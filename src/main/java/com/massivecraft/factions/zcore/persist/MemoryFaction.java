@@ -74,6 +74,11 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         }
     }
 
+    /* Compatibility method */
+    public Set<FLocation> getAllClaims() {
+        return Board.getInstance().getAllClaims(this);
+    }
+
     public ConcurrentHashMap<String, LazyLocation> getWarps() {
         return this.warps;
     }

@@ -149,6 +149,8 @@ public interface Faction extends EconomyParticipator {
 
     public int getMaxLand();
 
+    public Set<FLocation> getAllClaims();
+
     // ----------------------------------------------//
     // DTR
     // ----------------------------------------------//

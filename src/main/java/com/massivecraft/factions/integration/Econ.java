@@ -304,7 +304,7 @@ public class Econ {
 
         if (delta == 0) {
             // no money actually transferred?
-//			ep.msg("<h>%s<i> didn't have to pay anything %s.", You, forDoingThis);  // might be for gains, might be for losses
+            //			ep.msg("<h>%s<i> didn't have to pay anything %s.", You, forDoingThis);  // might be for gains, might be for losses
             return true;
         }
         //TODO: TL

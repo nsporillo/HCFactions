@@ -78,7 +78,7 @@ public class CmdUnclaim extends FCommand {
             return;
         }
 
-        if(!canUnclaim(otherFaction)) {
+        if (!canUnclaim(otherFaction)) {
             return;
         }
 

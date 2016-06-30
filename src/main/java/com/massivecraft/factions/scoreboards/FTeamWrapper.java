@@ -62,17 +62,17 @@ public class FTeamWrapper {
         }
 
         for (OfflinePlayer player : wrapper.getPlayers()) {
-            if(!player.isOnline()) {
+            if (!player.isOnline()) {
                 wrapper.removePlayer(player);
             }
-            if(!factionMembers.contains(FPlayers.getInstance().getByOfflinePlayer(player))) {
+            if (!factionMembers.contains(FPlayers.getInstance().getByOfflinePlayer(player))) {
                 // player kicked or left, faction still exists, so update wilderness
                 doWildernessUpdate = true;
                 wrapper.removePlayer(player);
             }
         }
 
-        if(doWildernessUpdate) {
+        if (doWildernessUpdate) {
             FTeamWrapper.applyUpdates(Factions.getInstance().getNone());
         }
 

@@ -118,6 +118,11 @@
             <version>2.1</version>
         </dependency>
         <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>LATEST</version>
+        </dependency>
+        <dependency>
             <groupId>org.itsmonkey</groupId>
             <artifactId>HCFEssentials</artifactId>
             <version>LATEST</version>

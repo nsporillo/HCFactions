@@ -12,6 +12,8 @@ import com.massivecraft.factions.util.LazyLocation;
 import com.massivecraft.factions.util.MiscUtil;
 import com.massivecraft.factions.util.RelationUtil;
 import com.massivecraft.factions.zcore.util.TL;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -23,32 +25,23 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class MemoryFaction implements Faction, EconomyParticipator {
-    protected ConcurrentHashMap<String, LazyLocation> warps = new ConcurrentHashMap<String, LazyLocation>();
-    protected Map<FLocation, Set<String>> claimOwnership = new ConcurrentHashMap<FLocation, Set<String>>();
-    protected HashMap<String, List<String>> announcements = new HashMap<String, List<String>>();
-    protected Map<String, Relation> relationWish = new HashMap<String, Relation>();
-    protected transient Set<FPlayer> fplayers = new HashSet<FPlayer>();
-    protected Set<String> invites = new HashSet<String>();
-    protected String id = null;
-    protected transient long lastPlayerLoggedOffTime;
-    protected long lastDtrUpdateTime;
-    protected boolean peacefulExplosionsEnabled;
-    protected String description;
-    protected LazyLocation home;
-    protected boolean permanent;
-    protected boolean peaceful;
-    protected boolean open;
-    protected double money;
-    protected long foundedDate;
-    private long lastDeath;
-    protected String tag;
-    protected transient boolean wasFrozen;
-    protected double dtr;
-    protected int land;
 
-    public HashMap<String, List<String>> getAnnouncements() {
-        return this.announcements;
-    }
+    @Getter private ConcurrentHashMap<String, LazyLocation> warps = new ConcurrentHashMap<>();
+    @Getter private Map<FLocation, Set<String>> claimOwnership = new ConcurrentHashMap<>();
+    @Getter private HashMap<String, List<String>> announcements = new HashMap<>();
+    private Map<String, Relation> relationWish = new HashMap<>();
+    @Getter private Set<String> invites = new HashSet<>();
+    @Getter @Setter protected String description, id;
+    protected LazyLocation home;
+    @Getter @Setter private boolean peaceful, open, peacefulExplosionsEnabled;
+    @Getter @Setter private long foundedDate, lastDeath, lastDtrUpdateTime;
+    protected String tag;
+    protected boolean permanent;
+    protected double money, dtr;
+
+    protected transient Set<FPlayer> fplayers = new HashSet<>();
+    private transient long lastPlayerLoggedOffTime;
+    private transient boolean wasFrozen;
 
     public void addAnnouncement(FPlayer fPlayer, String msg) {
         List<String> list = announcements.containsKey(fPlayer.getId()) ? announcements.get(fPlayer.getId()) : new ArrayList<String>();
@@ -79,10 +72,6 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         return Board.getInstance().getAllClaims(this);
     }
 
-    public ConcurrentHashMap<String, LazyLocation> getWarps() {
-        return this.warps;
-    }
-
     public LazyLocation getWarp(String name) {
         return this.warps.get(name);
     }
@@ -103,18 +92,6 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         warps.clear();
     }
 
-    public Set<String> getInvites() {
-        return invites;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public void invite(FPlayer fplayer) {
         this.invites.add(fplayer.getId());
     }
@@ -125,30 +102,6 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
     public boolean isInvited(FPlayer fplayer) {
         return this.invites.contains(fplayer.getId());
-    }
-
-    public boolean getOpen() {
-        return open;
-    }
-
-    public void setOpen(boolean isOpen) {
-        open = isOpen;
-    }
-
-    public boolean isPeaceful() {
-        return this.peaceful;
-    }
-
-    public void setPeaceful(boolean isPeaceful) {
-        this.peaceful = isPeaceful;
-    }
-
-    public void setPeacefulExplosionsEnabled(boolean val) {
-        peacefulExplosionsEnabled = val;
-    }
-
-    public boolean getPeacefulExplosionsEnabled() {
-        return this.peacefulExplosionsEnabled;
     }
 
     public boolean noExplosionsInTerritory() {
@@ -212,14 +165,6 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         return MiscUtil.getComparisonString(this.tag);
     }
 
-    public String getDescription() {
-        return this.description;
-    }
-
-    public void setDescription(String value) {
-        this.description = value;
-    }
-
     public void setHome(Location home) {
         this.home = new LazyLocation(home);
     }
@@ -233,22 +178,11 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         return (this.home != null) ? this.home.getLocation() : null;
     }
 
-    public long getFoundedDate() {
-        // no factions were founded in 1969, update them
-        if (this.foundedDate == 0) {
-            this.setFoundedDate(System.currentTimeMillis());
-        }
-        return this.foundedDate;
-    }
-
-    public void setFoundedDate(long newDate) {
-        this.foundedDate = newDate;
-    }
-
     public void confirmValidHome() {
         if (!Conf.homesMustBeInClaimedTerritory || this.home == null || (this.home.getLocation() != null && Board.getInstance().getFactionAt(new FLocation(this.home.getLocation())) == this)) {
             return;
         }
+
         msg(TL.FACTION_UNSET.toString());
         this.home = null;
     }
@@ -264,19 +198,10 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         return aid;
     }
 
-    public void setLastDeath(long time) {
-        this.lastDeath = time;
-    }
-
-    public long getLastDeath() {
-        return this.lastDeath;
-    }
-
     // -------------------------------------------- //
     // Construct
     // -------------------------------------------- //
-    public MemoryFaction() {
-    }
+    protected MemoryFaction() {}
 
     public MemoryFaction(String id) {
         this.id = id;
@@ -309,7 +234,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         money = old.money;
         relationWish = old.relationWish;
         claimOwnership = old.claimOwnership;
-        fplayers = new HashSet<FPlayer>();
+        fplayers = new HashSet<>();
         invites = old.invites;
         announcements = old.announcements;
     }
@@ -387,6 +312,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         if (this.relationWish.containsKey(otherFaction.getId())) {
             return this.relationWish.get(otherFaction.getId());
         }
+
         return Relation.fromString(P.p.getConfig().getString("default-relation", "enemy")); // Always default to old behavior.
     }
 
@@ -400,11 +326,13 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
     public int getRelationCount(Relation relation) {
         int count = 0;
+
         for (Faction faction : Factions.getInstance().getAllFactions()) {
             if (faction.getRelationTo(this) == relation) {
                 count++;
             }
         }
+
         return count;
     }
 
@@ -449,6 +377,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
                 // if we block background-regen, then we need to fake updates
                 this.lastDtrUpdateTime = System.currentTimeMillis();
             }
+
             wasFrozen = true;
             return;
         } else if (wasFrozen && P.p.getConfig().getBoolean("hcf.dtr.notify-unfreeze", false)) {
@@ -475,9 +404,11 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         if (this.dtr != toDtr) {
             DTRChangeEvent changeEvent = new DTRChangeEvent(this, null, this.dtr, toDtr);
             Bukkit.getServer().getPluginManager().callEvent(changeEvent);
+
             if (changeEvent.isCancelled()) {
                 return;
             }
+
             P.p.debug("Faction=[" + getTag() + "]");
             P.p.debug("From=[" + changeEvent.getFrom() + "] To=[" + changeEvent.getTo() + "]");
             P.p.debug("Change=[" + (changeEvent.getTo() - changeEvent.getFrom()) + "]");
@@ -490,6 +421,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         if (getSize() == 1) {
             return P.p.getConfig().getDouble("hcf.dtr.solo-faction", 1.02D);
         }
+
         return getMaxPlayerDTR() * this.fplayers.size();
     }
 
@@ -536,6 +468,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
             long freezeSeconds = P.p.getConfig().getLong("hcf.dtr.dtr-freeze", 0);
             return freezeSeconds * 1000 - (System.currentTimeMillis() - lastDeath);
         }
+
         return 0;
     }
 
@@ -546,6 +479,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
     // maintain the reference list of FPlayers in this faction
     public void refreshFPlayers() {
         fplayers.clear();
+
         if (this.isPlayerFreeType()) {
             return;
         }
@@ -572,14 +506,16 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
     public Set<FPlayer> getFPlayers() {
         // return a shallow copy of the FPlayer list, to prevent tampering and
         // concurrency issues
-        return new HashSet<FPlayer>(fplayers);
+        return new HashSet<>(fplayers);
     }
 
     public Set<FPlayer> getFPlayersWhereOnline(boolean online) {
-        Set<FPlayer> ret = new HashSet<FPlayer>();
+        Set<FPlayer> ret = new HashSet<>();
+
         if (!this.isNormal()) {
             return ret;
         }
+
         for (FPlayer fplayer : fplayers) {
             if (fplayer.isOnline() == online) {
                 ret.add(fplayer);
@@ -599,11 +535,13 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
                 return fplayer;
             }
         }
+
         return null;
     }
 
     public ArrayList<FPlayer> getFPlayersWhereRole(Role role) {
-        ArrayList<FPlayer> ret = new ArrayList<FPlayer>();
+        ArrayList<FPlayer> ret = new ArrayList<>();
+
         if (!this.isNormal()) {
             return ret;
         }
@@ -618,13 +556,15 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
     }
 
     public ArrayList<Player> getOnlinePlayers() {
-        ArrayList<Player> ret = new ArrayList<Player>();
+        ArrayList<Player> ret = new ArrayList<>();
+
         if (this.isPlayerFreeType()) {
             return ret;
         }
 
         for (Player player : P.p.getServer().getOnlinePlayers()) {
             FPlayer fplayer = FPlayers.getInstance().getByPlayer(player);
+
             if (fplayer.getFaction() == this) {
                 ret.add(player);
             }
@@ -643,6 +583,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
         for (Player player : P.p.getServer().getOnlinePlayers()) {
             FPlayer fplayer = FPlayers.getInstance().getByPlayer(player);
+
             if (fplayer != null && fplayer.getFaction() == this) {
                 return true;
             }
@@ -673,6 +614,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
         // get list of moderators, or list of normal members if there are no moderators
         ArrayList<FPlayer> replacements = this.getFPlayersWhereRole(Role.MODERATOR);
+
         if (replacements == null || replacements.isEmpty()) {
             replacements = this.getFPlayersWhereRole(Role.NORMAL);
         }
@@ -682,6 +624,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
                 if (oldLeader != null) {
                     oldLeader.setRole(Role.NORMAL);
                 }
+
                 return;
             }
 
@@ -699,6 +642,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
             if (oldLeader != null) {
                 oldLeader.setRole(Role.NORMAL);
             }
+
             replacements.get(0).setRole(Role.ADMIN);
             msg(TL.FACTION_ADMIN_CHANGE, oldLeader == null ? "" : oldLeader.getName(), replacements.get(0).getName());
             P.p.log("Faction " + this.getTag() + " (" + this.getId() + ") admin was removed. Replacement admin: " + replacements.get(0).getName());
@@ -736,10 +680,6 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
     // Ownership of specific claims
     // ----------------------------------------------//
 
-    public Map<FLocation, Set<String>> getClaimOwnership() {
-        return claimOwnership;
-    }
-
     public void clearAllClaimOwnership() {
         claimOwnership.clear();
     }
@@ -763,6 +703,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
             }
 
             Iterator<String> iter = ownerData.iterator();
+
             while (iter.hasNext()) {
                 if (iter.next().equals(player.getId())) {
                     iter.remove();
@@ -792,27 +733,29 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         if (claimOwnership.isEmpty()) {
             return false;
         }
+
         Set<String> ownerData = claimOwnership.get(loc);
-        if (ownerData == null) {
-            return false;
-        }
-        return ownerData.contains(player.getId());
+        return ownerData != null && ownerData.contains(player.getId());
     }
 
     public void setPlayerAsOwner(FPlayer player, FLocation loc) {
         Set<String> ownerData = claimOwnership.get(loc);
+
         if (ownerData == null) {
-            ownerData = new HashSet<String>();
+            ownerData = new HashSet<>();
         }
+
         ownerData.add(player.getId());
         claimOwnership.put(loc, ownerData);
     }
 
     public void removePlayerAsOwner(FPlayer player, FLocation loc) {
         Set<String> ownerData = claimOwnership.get(loc);
+
         if (ownerData == null) {
             return;
         }
+
         ownerData.remove(player.getId());
         claimOwnership.put(loc, ownerData);
     }
@@ -823,20 +766,22 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
     public String getOwnerListString(FLocation loc) {
         Set<String> ownerData = claimOwnership.get(loc);
+
         if (ownerData == null || ownerData.isEmpty()) {
             return "";
         }
 
         String ownerList = "";
 
-        Iterator<String> iter = ownerData.iterator();
-        while (iter.hasNext()) {
+        for (String anOwnerData : ownerData) {
             if (!ownerList.isEmpty()) {
                 ownerList += ", ";
             }
-            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(iter.next()));
+
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(UUID.fromString(anOwnerData));
             ownerList += offlinePlayer != null ? offlinePlayer.getName() : TL.GENERIC_NULLPLAYER.toString();
         }
+
         return ownerList;
     }
 

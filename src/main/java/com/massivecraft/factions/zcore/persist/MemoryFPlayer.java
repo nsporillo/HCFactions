@@ -16,6 +16,8 @@ import com.massivecraft.factions.struct.Relation;
 import com.massivecraft.factions.struct.Role;
 import com.massivecraft.factions.util.RelationUtil;
 import com.massivecraft.factions.zcore.util.TL;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
@@ -23,7 +25,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
 
 /**
  * Logged in players always have exactly one FPlayer instance. Logged out players may or may not have an FPlayer
@@ -50,6 +51,7 @@ public abstract class MemoryFPlayer implements FPlayer {
     protected long lastLoginTime;
     protected long lastCombatTime;
 
+    private transient UUID uuid;
     protected transient FLocation lastStoodAt = new FLocation();
     protected transient Faction autoClaimFor;
     protected transient boolean mapAutoUpdating;
@@ -57,6 +59,7 @@ public abstract class MemoryFPlayer implements FPlayer {
     protected transient boolean autoWarZoneEnabled;
     protected transient boolean isAdminBypassing = false;
     protected transient boolean loginPvpDisabled;
+    @Getter @Setter protected transient boolean online;
 
     public Faction getFaction() {
         if (this.factionId == null) {
@@ -290,6 +293,13 @@ public abstract class MemoryFPlayer implements FPlayer {
 
     public void setLastStoodAt(FLocation flocation) {
         this.lastStoodAt = flocation;
+    }
+
+    /* Avoid new object allocation, reuse existing object and update all fields */
+    public void setLastStoodAt(String world, int x, int z) {
+        this.lastStoodAt.setWorldName(world);
+        this.lastStoodAt.setX(x);
+        this.lastStoodAt.setZ(z);
     }
 
     //----------------------------------------------//
@@ -716,12 +726,16 @@ public abstract class MemoryFPlayer implements FPlayer {
         this.msg(translation.toString(), args);
     }
 
-    public Player getPlayer() {
-        return Bukkit.getPlayer(UUID.fromString(this.getId()));
+    public UUID getUUID() {
+        if (this.uuid == null) {
+            this.uuid = UUID.fromString(this.id);
+        }
+
+        return uuid;
     }
 
-    public boolean isOnline() {
-        return this.getPlayer() != null;
+    public Player getPlayer() {
+        return Bukkit.getPlayer(this.getUUID());
     }
 
     // make sure target player should be able to detect that this player is online
@@ -749,9 +763,11 @@ public abstract class MemoryFPlayer implements FPlayer {
             return;
         }
         Player player = this.getPlayer();
+
         if (player == null) {
             return;
         }
+
         player.sendMessage(msg);
     }
 

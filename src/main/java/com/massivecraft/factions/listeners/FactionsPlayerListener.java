@@ -27,6 +27,7 @@ import org.bukkit.event.player.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -48,44 +49,49 @@ public class FactionsPlayerListener implements Listener {
     }
 
     private void initPlayer(Player player) {
-        // Make sure that all online players do have a fplayer.
-        final FPlayer me = FPlayers.getInstance().getByPlayer(player);
-        ((MemoryFPlayer) me).setName(player.getName());
+        final MemoryFPlayer fme = (MemoryFPlayer) FPlayers.getInstance().getByPlayer(player);
+
+        fme.setName(player.getName());
+        fme.setOnline(true);
 
         // Update the lastLoginTime for this fplayer
-        me.setLastLoginTime(System.currentTimeMillis());
+        fme.setLastLoginTime(System.currentTimeMillis());
 
-        // Store player's current FLocation and notify them where they are
-        me.setLastStoodAt(new FLocation(player.getLocation()));
+        // Set players location and notify them where they are
+        fme.setLastStoodAt(
+                player.getLocation().getWorld().getName(),
+                FLocation.blockToChunk(player.getLocation().getBlockX()),
+                FLocation.blockToChunk(player.getLocation().getBlockZ())
+        );
 
-        ((MemoryFPlayer) me).saveStats(); // set kills / deaths
+        fme.saveStats(); // set kills / deaths
 
         // Check for Faction announcements. Let's delay this so they actually see it.
-        Bukkit.getScheduler().runTaskLater(P.p, new Runnable() {
-            @Override
-            public void run() {
-                if (me.isOnline()) {
-                    me.getFaction().sendUnreadAnnouncements(me);
-                }
+        Bukkit.getScheduler().runTaskLaterAsynchronously(P.p, () -> {
+            if (fme.isOnline()) {
+                fme.getFaction().sendUnreadAnnouncements(fme);
             }
-        }, 33L); // Don't ask me why.
+        }, 33L);
 
-        FScoreboard.init(me);
+        FScoreboard.init(fme);
+
         if (P.p.getConfig().getBoolean("scoreboard.default-enabled", false)) {
             int interval = P.p.getConfig().getInt("default-update-interval", 5);
             P.p.debug("Update interval: " + interval + " ticks: " + interval * 20);
-            FScoreboard.get(me).setDefaultSidebar(new FDefaultSidebar(), interval * 20);
+            FScoreboard.get(fme).setDefaultSidebar(new FDefaultSidebar(), interval * 20);
         }
-        FScoreboard.get(me).setSidebarVisibility(P.p.cmdBase.cmdSB.showBoard(me));
 
-        Faction myFaction = me.getFaction();
-        if (!myFaction.isWilderness()) {
-            for (FPlayer other : myFaction.getFPlayersWhereOnline(true)) {
-                if (other != me && other.isMonitoringJoins()) {
-                    other.msg(TL.FACTION_LOGIN, me.getName());
-                }
+        FScoreboard.get(fme).setSidebarVisibility(P.p.cmdBase.cmdSB.showBoard(fme));
+
+        Faction myFaction = fme.getFaction();
+
+        final Set<FPlayer> onlineMembers = myFaction.getFPlayersWhereOnline(true);
+
+        Bukkit.getScheduler().runTaskAsynchronously(P.p, () -> {
+            if (!myFaction.isWilderness()) {
+                onlineMembers.stream().filter(other -> other != fme && other.isMonitoringJoins()).forEach(other -> other.msg(TL.FACTION_LOGIN, fme.getName()));
             }
-        }
+        });
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -96,6 +102,7 @@ public class FactionsPlayerListener implements Listener {
         me.setLastLoginTime(System.currentTimeMillis());
 
         ((MemoryFPlayer) me).saveStats(); // cache kills / deaths
+        ((MemoryFPlayer) me).setOnline(false);
 
         // if player is waiting for a fstuck request but leaves, cancel and alert when they come back
         if (P.p.getStuckRequestMap().containsKey(me.getPlayer().getUniqueId())) {

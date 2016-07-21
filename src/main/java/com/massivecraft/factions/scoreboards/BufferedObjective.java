@@ -18,7 +18,7 @@ public class BufferedObjective {
     private final String baseName;
 
     private Objective current;
-    private List<Team> currentTeams = new ArrayList<Team>();
+    private List<Team> currentTeams = new ArrayList<>();
     private String title;
     private DisplaySlot displaySlot;
 
@@ -26,7 +26,7 @@ public class BufferedObjective {
     private int teamPtr;
     private boolean requiresUpdate = false;
 
-    private final Map<Integer, String> contents = new HashMap<Integer, String>();
+    private final Map<Integer, String> contents = new HashMap<>();
 
     static {
         // Check for long line support.
@@ -58,9 +58,11 @@ public class BufferedObjective {
     private String createBaseName() {
         Random random = new Random();
         StringBuilder builder = new StringBuilder();
+
         while (builder.length() < 14) {
             builder.append(Integer.toHexString(random.nextInt()));
         }
+
         return builder.toString().substring(0, 14);
     }
 
@@ -80,6 +82,7 @@ public class BufferedObjective {
         if (lines.size() != contents.size()) {
             contents.clear();
         }
+
         for (int i = 0; i < lines.size(); i++) {
             setLine(lines.size() - i, lines.get(i));
         }
@@ -114,7 +117,7 @@ public class BufferedObjective {
         Objective buffer = scoreboard.registerNewObjective(getNextObjectiveName(), "dummy");
         buffer.setDisplayName(title);
 
-        List<Team> bufferTeams = new ArrayList<Team>();
+        List<Team> bufferTeams = new ArrayList<>();
 
         for (Map.Entry<Integer, String> entry : contents.entrySet()) {
             if (entry.getValue().length() > 16) {
@@ -125,6 +128,7 @@ public class BufferedObjective {
 
                 team.setPrefix(split.next());
                 String name = split.next();
+
                 if (split.hasNext()) { // We only guarantee two splits
                     team.setSuffix(split.next());
                 }
@@ -133,6 +137,7 @@ public class BufferedObjective {
                     addEntryMethod.invoke(team, name);
                 } catch (ReflectiveOperationException ignored) {
                 }
+
                 buffer.getScore(name).setScore(entry.getKey());
             } else {
                 buffer.getScore(entry.getValue()).setScore(entry.getKey());
@@ -147,6 +152,7 @@ public class BufferedObjective {
         current.unregister();
 
         Iterator<Team> it = currentTeams.iterator();
+
         while (it.hasNext()) {
             it.next().unregister();
             it.remove();

@@ -108,6 +108,9 @@ scoreboard:
   #   The scoreboard needs to be enabled for this to work.
   default-prefixes: true
 
+  # Offload nametag / scoreboard related functions to another thread (recommended)
+  async-wrappers: true
+
   default:
     - "&6Your Faction"
     - "{faction}"

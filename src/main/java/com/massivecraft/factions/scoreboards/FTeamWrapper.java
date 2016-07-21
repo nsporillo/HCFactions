@@ -2,74 +2,110 @@ package com.massivecraft.factions.scoreboards;
 
 import com.massivecraft.factions.*;
 import com.massivecraft.factions.zcore.util.TL;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FTeamWrapper {
-    private static final Map<Faction, FTeamWrapper> wrappers = new HashMap<Faction, FTeamWrapper>();
-    private static final List<FScoreboard> tracking = new ArrayList<FScoreboard>();
-    private static int factionTeamPtr;
-    private static final Set<Faction> updating = new HashSet<Faction>();
 
-    private final Map<FScoreboard, Team> teams = new HashMap<FScoreboard, Team>();
-    private final String teamName;
-    private final Faction faction;
-    private final Set<OfflinePlayer> members = new HashSet<OfflinePlayer>();
+    /* Global FTeamWrapper variables */
+    private static Map<String, FTeamWrapper> wrappers = new ConcurrentHashMap<>();
+    private static Set<String> updating = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static Set<FScoreboard> tracking = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static Set<OfflinePlayer> members = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private static int factionTeamPtr;
+
+    /* FTeamWrapper instance variables*/
+    private Map<FScoreboard, Team> teams = new ConcurrentHashMap<>();
+    private String teamName;
+    private Faction faction;
 
     public static void applyUpdatesLater(final Faction faction) {
         if (!FScoreboard.isSupportedByServer() || !P.p.getConfig().getBoolean("scoreboard.default-prefixes", true)) {
             return;
         }
 
-        if (updating.add(faction)) {
-            Bukkit.getScheduler().runTask(P.p, new Runnable() {
-                @Override
-                public void run() {
-                    updating.remove(faction);
-                    applyUpdates(faction);
-                }
-            });
+        if (updating.add(faction.getId())) {
+            if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        updating.remove(faction.getId());
+                        update(faction);
+                    }
+                }.runTaskLaterAsynchronously(P.p, 10L);
+            } else {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        updating.remove(faction.getId());
+                        update(faction);
+                    }
+                }.runTaskLater(P.p, 10L);
+            }
         }
     }
 
-    public static void applyUpdates(Faction faction) {
+    public static void applyUpdates(final Faction faction) {
         if (!FScoreboard.isSupportedByServer() || !P.p.getConfig().getBoolean("scoreboard.default-prefixes", true)) {
             return;
         }
 
-        if (updating.contains(faction)) {
-            // Faction will be updated soon.
-            return;
+        if (updating.contains(faction.getId())) {
+            return;  // Faction will be updated soon.
         }
 
-        FTeamWrapper wrapper = wrappers.get(faction);
-        Set<FPlayer> factionMembers = faction.getFPlayers();
+        if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    update(faction);
+                }
+            }.runTaskAsynchronously(P.p);
+        } else {
+            update(faction);
+        }
+    }
 
+    private static void update(Faction faction) {
+        FTeamWrapper wrapper = wrappers.get(faction.getId());
+        Set<FPlayer> factionMembers = faction.getFPlayers();
         boolean doWildernessUpdate = false;
+
         if (wrapper != null && Factions.getInstance().getFactionById(faction.getId()) == null) {
-            wrappers.remove(faction); // gc disbanded faction
+            wrappers.remove(faction.getId()); // gc disbanded faction
             doWildernessUpdate = true; // update wilderness since it has a new player
         }
 
         if (wrapper == null) {
             P.p.debug("New FTeamWrapper for [" + faction.getTag() + "]");
             wrapper = new FTeamWrapper(faction);
-            wrappers.put(faction, wrapper);
+            wrappers.put(faction.getId(), wrapper);
         }
 
-        for (OfflinePlayer player : wrapper.getPlayers()) {
+        Set<OfflinePlayer> toRemove = new HashSet<>();
+
+        for (OfflinePlayer player : members) {
             if (!player.isOnline()) {
-                wrapper.removePlayer(player);
+                toRemove.add(player);
             }
+
             if (!factionMembers.contains(FPlayers.getInstance().getByOfflinePlayer(player))) {
                 // player kicked or left, faction still exists, so update wilderness
                 doWildernessUpdate = true;
-                wrapper.removePlayer(player);
+                toRemove.add(player);
             }
+        }
+
+        for (OfflinePlayer player : toRemove) {
+            wrapper.removePlayer(player);
         }
 
         if (doWildernessUpdate) {
@@ -88,10 +124,12 @@ public class FTeamWrapper {
                 if (!fmember.isOnline()) {
                     continue;
                 }
+
                 // Scoreboard might not have player; add him/her
                 wrapper.addPlayer(fmember.getPlayer());
             }
         }
+
         wrapper.updatePrefixes();
     }
 
@@ -100,10 +138,10 @@ public class FTeamWrapper {
             return;
         }
 
-        if (!wrappers.containsKey(faction)) {
+        if (!wrappers.containsKey(faction.getId())) {
             applyUpdates(faction);
         } else {
-            wrappers.get(faction).updatePrefixes();
+            wrappers.get(faction.getId()).updatePrefixes();
         }
     }
 
@@ -111,9 +149,22 @@ public class FTeamWrapper {
         if (!FScoreboard.isSupportedByServer()) {
             return;
         }
+
         tracking.add(fboard);
-        for (FTeamWrapper wrapper : wrappers.values()) {
-            wrapper.add(fboard);
+
+        if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (FTeamWrapper wrapper : wrappers.values()) {
+                        wrapper.add(fboard);
+                    }
+                }
+            }.runTaskAsynchronously(P.p);
+        } else {
+            for (FTeamWrapper wrapper : wrappers.values()) {
+                wrapper.add(fboard);
+            }
         }
     }
 
@@ -121,9 +172,22 @@ public class FTeamWrapper {
         if (!FScoreboard.isSupportedByServer()) {
             return;
         }
+
         tracking.remove(fboard);
-        for (FTeamWrapper wrapper : wrappers.values()) {
-            wrapper.remove(fboard);
+
+        if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (FTeamWrapper wrapper : wrappers.values()) {
+                        wrapper.remove(fboard);
+                    }
+                }
+            }.runTaskAsynchronously(P.p);
+        } else {
+            for (FTeamWrapper wrapper : wrappers.values()) {
+                wrapper.remove(fboard);
+            }
         }
     }
 
@@ -132,9 +196,7 @@ public class FTeamWrapper {
         this.teamName = "faction_" + (factionTeamPtr++);
         this.faction = faction;
 
-        for (FScoreboard fboard : tracking) {
-            add(fboard);
-        }
+        tracking.forEach(this::add);
     }
 
     private void add(FScoreboard fboard) {
@@ -142,8 +204,10 @@ public class FTeamWrapper {
         Team team = board.registerNewTeam(teamName);
         teams.put(fboard, team);
 
-        for (OfflinePlayer player : getPlayers()) {
-            team.addPlayer(player);
+        for (OfflinePlayer player : members) {
+            if (player.isOnline()) {
+                team.addEntry(player.getName());
+            }
         }
 
         updatePrefix(fboard);
@@ -155,8 +219,15 @@ public class FTeamWrapper {
 
     private void updatePrefixes() {
         if (P.p.getConfig().getBoolean("scoreboard.default-prefixes", true)) {
-            for (FScoreboard fboard : teams.keySet()) {
-                updatePrefix(fboard);
+            if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        teams.keySet().forEach(FTeamWrapper.this::updatePrefix);
+                    }
+                }.runTaskAsynchronously(P.p);
+            } else {
+                teams.keySet().forEach(this::updatePrefix);
             }
         }
     }
@@ -170,6 +241,7 @@ public class FTeamWrapper {
 
             prefix = prefix.replace("{relationcolor}", faction.getRelationTo(fplayer).getColor().toString());
             prefix = prefix.replace("{faction}", faction.getTag().substring(0, Math.min("{faction}".length() + 16 - prefix.length(), faction.getTag().length())));
+
             if (team.getPrefix() == null || !team.getPrefix().equals(prefix)) {
                 team.setPrefix(prefix);
             }
@@ -179,7 +251,7 @@ public class FTeamWrapper {
     private void addPlayer(OfflinePlayer player) {
         if (members.add(player)) {
             for (Team team : teams.values()) {
-                team.addPlayer(player);
+                team.addEntry(player.getName());
             }
         }
     }
@@ -187,13 +259,9 @@ public class FTeamWrapper {
     private void removePlayer(OfflinePlayer player) {
         if (members.remove(player)) {
             for (Team team : teams.values()) {
-                team.removePlayer(player);
+                team.removeEntry(player.getName());
             }
         }
-    }
-
-    private Set<OfflinePlayer> getPlayers() {
-        return new HashSet<OfflinePlayer>(this.members);
     }
 }
 

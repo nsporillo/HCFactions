@@ -67,7 +67,7 @@ public class CmdJoin extends FCommand {
             return;
         }
 
-        if (!(faction.getOpen() || faction.isInvited(fplayer) || fme.isAdminBypassing() || Permission.JOIN_ANY.has(sender, false))) {
+        if (!(faction.isOpen() || faction.isInvited(fplayer) || fme.isAdminBypassing() || Permission.JOIN_ANY.has(sender, false))) {
             msg(TL.COMMAND_JOIN_REQUIRESINVITATION);
             if (samePlayer) {
                 faction.msg(TL.COMMAND_JOIN_ATTEMPTEDJOIN, fplayer.describeTo(faction, true));

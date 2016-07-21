@@ -23,12 +23,13 @@ import org.bukkit.entity.Player;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public abstract class MemoryFaction implements Faction, EconomyParticipator {
 
     @Getter private ConcurrentHashMap<String, LazyLocation> warps = new ConcurrentHashMap<>();
     @Getter private Map<FLocation, Set<String>> claimOwnership = new ConcurrentHashMap<>();
-    @Getter private HashMap<String, List<String>> announcements = new HashMap<>();
+    @Getter private Map<String, List<String>> announcements = new ConcurrentHashMap<>();
     private Map<String, Relation> relationWish = new HashMap<>();
     @Getter private Set<String> invites = new HashSet<>();
     @Getter @Setter protected String description, id;
@@ -53,10 +54,11 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
         if (!announcements.containsKey(fPlayer.getId())) {
             return;
         }
+
         fPlayer.msg(TL.FACTION_UNREAD_ANNOUNCEMENT.toString());
-        for (String s : announcements.get(fPlayer.getPlayer().getUniqueId().toString())) {
-            fPlayer.sendMessage(s);
-        }
+
+        announcements.get(fPlayer.getPlayer().getUniqueId().toString()).forEach(fPlayer::sendMessage);
+
         fPlayer.msg(TL.FACTION_UNREAD_ANNOUNCEMENT.toString());
         announcements.remove(fPlayer.getId());
     }
@@ -516,11 +518,7 @@ public abstract class MemoryFaction implements Faction, EconomyParticipator {
             return ret;
         }
 
-        for (FPlayer fplayer : fplayers) {
-            if (fplayer.isOnline() == online) {
-                ret.add(fplayer);
-            }
-        }
+        ret.addAll(fplayers.stream().filter(fplayer -> fplayer.isOnline() == online).collect(Collectors.toList()));
 
         return ret;
     }

@@ -34,7 +34,7 @@ public class CmdBoom extends FCommand {
             return;
         }
 
-        myFaction.setPeacefulExplosionsEnabled(this.argAsBool(0, !myFaction.getPeacefulExplosionsEnabled()));
+        myFaction.setPeacefulExplosionsEnabled(this.argAsBool(0, !myFaction.isPeacefulExplosionsEnabled()));
 
         String enabled = myFaction.noExplosionsInTerritory() ? TL.GENERIC_DISABLED.toString() : TL.GENERIC_ENABLED.toString();
 

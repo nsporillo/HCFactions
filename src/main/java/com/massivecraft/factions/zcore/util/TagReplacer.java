@@ -187,7 +187,7 @@ public enum TagReplacer {
             case FACTION:
                 return fac.getTag();
             case JOINING:
-                return (fac.getOpen() ? TL.COMMAND_SHOW_UNINVITED.toString() : TL.COMMAND_SHOW_INVITATION.toString());
+                return (fac.isOpen() ? TL.COMMAND_SHOW_UNINVITED.toString() : TL.COMMAND_SHOW_INVITATION.toString());
             case PEACEFUL:
                 return fac.isPeaceful() ? Conf.colorNeutral + TL.COMMAND_SHOW_PEACEFUL.toString() : "";
             case PERMANENT:

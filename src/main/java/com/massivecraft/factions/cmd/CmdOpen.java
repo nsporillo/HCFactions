@@ -31,9 +31,9 @@ public class CmdOpen extends FCommand {
             return;
         }
 
-        myFaction.setOpen(this.argAsBool(0, !myFaction.getOpen()));
+        myFaction.setOpen(this.argAsBool(0, !myFaction.isOpen()));
 
-        String open = myFaction.getOpen() ? TL.COMMAND_OPEN_OPEN.toString() : TL.COMMAND_OPEN_CLOSED.toString();
+        String open = myFaction.isOpen() ? TL.COMMAND_OPEN_OPEN.toString() : TL.COMMAND_OPEN_CLOSED.toString();
 
         // Inform
         for (FPlayer fplayer : FPlayers.getInstance().getOnlinePlayers()) {

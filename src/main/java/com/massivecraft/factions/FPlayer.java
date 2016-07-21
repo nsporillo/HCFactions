@@ -24,152 +24,152 @@ import java.util.List;
  */
 
 public interface FPlayer extends EconomyParticipator {
-    public Faction getFaction();
+    Faction getFaction();
 
-    public String getFactionId();
+    String getFactionId();
 
-    public boolean hasFaction();
+    boolean hasFaction();
 
-    public void setFaction(Faction faction);
+    void setFaction(Faction faction);
 
-    public void setMonitorJoins(boolean monitor);
+    void setMonitorJoins(boolean monitor);
 
-    public boolean isMonitoringJoins();
+    boolean isMonitoringJoins();
 
-    public Role getRole();
+    Role getRole();
 
-    public void setRole(Role role);
+    void setRole(Role role);
 
-    public Faction getAutoClaimFor();
+    Faction getAutoClaimFor();
 
-    public void setAutoClaimFor(Faction faction);
+    void setAutoClaimFor(Faction faction);
 
-    public boolean isAutoSafeClaimEnabled();
+    boolean isAutoSafeClaimEnabled();
 
-    public void setIsAutoSafeClaimEnabled(boolean enabled);
+    void setIsAutoSafeClaimEnabled(boolean enabled);
 
-    public boolean isAutoWarClaimEnabled();
+    boolean isAutoWarClaimEnabled();
 
-    public void setIsAutoWarClaimEnabled(boolean enabled);
+    void setIsAutoWarClaimEnabled(boolean enabled);
 
-    public boolean isAdminBypassing();
+    boolean isAdminBypassing();
 
-    public boolean isVanished();
+    boolean isVanished();
 
-    public void setIsAdminBypassing(boolean val);
+    void setIsAdminBypassing(boolean val);
 
-    public void setChatMode(ChatMode chatMode);
+    void setChatMode(ChatMode chatMode);
 
-    public ChatMode getChatMode();
+    ChatMode getChatMode();
 
-    public void setSpyingChat(boolean chatSpying);
+    void setSpyingChat(boolean chatSpying);
 
-    public boolean isSpyingChat();
+    boolean isSpyingChat();
 
     // FIELD: account
-    public String getAccountId();
+    String getAccountId();
 
-    public void resetFactionData(boolean doSpoutUpdate);
+    void resetFactionData(boolean doSpoutUpdate);
 
-    public void resetFactionData();
+    void resetFactionData();
 
-    public long getLastLoginTime();
+    long getLastLoginTime();
 
-    public long getLastCombatTime();
+    long getLastCombatTime();
 
-    public void setLastLoginTime(long lastLoginTime);
+    void setLastLoginTime(long lastLoginTime);
 
-    public void setLastCombatTime(long lastCombatTime);
+    void setLastCombatTime(long lastCombatTime);
 
-    public boolean isMapAutoUpdating();
+    boolean isMapAutoUpdating();
 
-    public void setMapAutoUpdating(boolean mapAutoUpdating);
+    void setMapAutoUpdating(boolean mapAutoUpdating);
 
-    public boolean hasLoginPvpDisabled();
+    boolean hasLoginPvpDisabled();
 
-    public FLocation getLastStoodAt();
+    FLocation getLastStoodAt();
 
-    public void setLastStoodAt(FLocation flocation);
+    void setLastStoodAt(FLocation flocation);
 
-    public String getTitle();
+    String getTitle();
 
-    public void setTitle(String title);
+    void setTitle(String title);
 
-    public String getName();
+    String getName();
 
-    public String getTag();
+    String getTag();
 
-    public int getKills();
+    int getKills();
 
-    public int getDeaths();
+    int getDeaths();
 
     // Base concatenations:
 
-    public String getNameAndSomething(String something);
+    String getNameAndSomething(String something);
 
-    public String getNameAndTitle();
+    String getNameAndTitle();
 
-    public String getNameAndTag();
+    String getNameAndTag();
 
     // Colored concatenations:
     // These are used in information messages
 
-    public String getNameAndTitle(Faction faction);
+    String getNameAndTitle(Faction faction);
 
-    public String getNameAndTitle(FPlayer fplayer);
+    String getNameAndTitle(FPlayer fplayer);
 
     // Chat Tag:
     // These are injected into the format of global chat messages.
 
-    public String getChatTag();
+    String getChatTag();
 
     // Colored Chat Tag
-    public String getChatTag(Faction faction);
+    String getChatTag(Faction faction);
 
-    public String getChatTag(FPlayer fplayer);
+    String getChatTag(FPlayer fplayer);
 
     // -------------------------------
     // Relation and relation colors
     // -------------------------------
 
     @Override
-    public String describeTo(RelationParticipator that, boolean ucfirst);
+    String describeTo(RelationParticipator that, boolean ucfirst);
 
     @Override
-    public String describeTo(RelationParticipator that);
+    String describeTo(RelationParticipator that);
 
     @Override
-    public Relation getRelationTo(RelationParticipator rp);
+    Relation getRelationTo(RelationParticipator rp);
 
     @Override
-    public Relation getRelationTo(RelationParticipator rp, boolean ignorePeaceful);
+    Relation getRelationTo(RelationParticipator rp, boolean ignorePeaceful);
 
-    public Relation getRelationToLocation();
+    Relation getRelationToLocation();
 
     @Override
-    public ChatColor getColorTo(RelationParticipator rp);
+    ChatColor getColorTo(RelationParticipator rp);
 
     //----------------------------------------------//
     // Health
     //----------------------------------------------//
-    public void heal(int amnt);
+    void heal(int amnt);
 
-    public void onDeath(String world);
+    void onDeath(String world);
 
     //----------------------------------------------//
     // Territory
     //----------------------------------------------//
-    public boolean isInOwnTerritory();
+    boolean isInOwnTerritory();
 
-    public boolean isInOthersTerritory();
+    boolean isInOthersTerritory();
 
-    public boolean isInAllyTerritory();
+    boolean isInAllyTerritory();
 
-    public boolean isInNeutralTerritory();
+    boolean isInNeutralTerritory();
 
-    public boolean isInEnemyTerritory();
+    boolean isInEnemyTerritory();
 
-    public void sendFactionHereMessage(Faction from);
+    void sendFactionHereMessage(Faction from);
 
     /**
      * Check if the scoreboard should be shown. Simple method to be used by above method.
@@ -177,39 +177,39 @@ public interface FPlayer extends EconomyParticipator {
      * @param toShow Faction to be shown.
      * @return true if should show, otherwise false.
      */
-    public boolean shouldShowScoreboard(Faction toShow);
+    boolean shouldShowScoreboard(Faction toShow);
 
     // -------------------------------
     // Actions
     // -------------------------------
 
-    public void leave(boolean makePay);
+    void leave(boolean makePay);
 
-    public boolean canClaimForFaction(Faction forFaction);
+    boolean canClaimForFaction(Faction forFaction);
 
-    public boolean canClaimForFactionAtLocation(Faction forFaction, Location location, boolean notifyFailure);
+    boolean canClaimForFactionAtLocation(Faction forFaction, Location location, boolean notifyFailure);
 
-    public boolean attemptClaim(Faction forFaction, Location location, boolean notifyFailure);
+    boolean attemptClaim(Faction forFaction, Location location, boolean notifyFailure);
 
-    public boolean attemptClaim(Faction forFaction, Location location, boolean notifyFailure, boolean notifySuccess);
+    boolean attemptClaim(Faction forFaction, Location location, boolean notifyFailure, boolean notifySuccess);
 
-    public void msg(String str, Object... args);
+    void msg(String str, Object... args);
 
-    public String getId();
+    String getId();
 
-    public Player getPlayer();
+    Player getPlayer();
 
-    public boolean isOnline();
+    boolean isOnline();
 
-    public void sendMessage(String message);
+    void sendMessage(String message);
 
-    public void sendMessage(List<String> messages);
+    void sendMessage(List<String> messages);
 
-    public boolean isOnlineAndVisibleTo(Player me);
+    boolean isOnlineAndVisibleTo(Player me);
 
-    public void remove();
+    void remove();
 
-    public boolean isOffline();
+    boolean isOffline();
 
-    public void setId(String id);
+    void setId(String id);
 }

@@ -9,248 +9,251 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface Faction extends EconomyParticipator {
-    public HashMap<String, List<String>> getAnnouncements();
 
-    public ConcurrentHashMap<String, LazyLocation> getWarps();
+    Map<String, List<String>> getAnnouncements();
 
-    public LazyLocation getWarp(String name);
+    Map<String, LazyLocation> getWarps();
 
-    public void setWarp(String name, LazyLocation loc);
+    LazyLocation getWarp(String name);
 
-    public boolean isWarp(String name);
+    void setWarp(String name, LazyLocation loc);
 
-    public boolean removeWarp(String name);
+    boolean isWarp(String name);
 
-    public void clearWarps();
+    boolean removeWarp(String name);
 
-    public void addAnnouncement(FPlayer fPlayer, String msg);
+    void clearWarps();
 
-    public void sendUnreadAnnouncements(FPlayer fPlayer);
+    void addAnnouncement(FPlayer fPlayer, String msg);
 
-    public void removeAnnouncements(FPlayer fPlayer);
+    void sendUnreadAnnouncements(FPlayer fPlayer);
 
-    public Set<String> getInvites();
+    void removeAnnouncements(FPlayer fPlayer);
 
-    public String getId();
+    Set<String> getInvites();
 
-    public void invite(FPlayer fplayer);
+    String getId();
 
-    public void deinvite(FPlayer fplayer);
+    void invite(FPlayer fplayer);
 
-    public boolean isInvited(FPlayer fplayer);
+    void deinvite(FPlayer fplayer);
 
-    public boolean getOpen();
+    boolean isInvited(FPlayer fplayer);
 
-    public void setOpen(boolean isOpen);
+    boolean isOpen();
 
-    public boolean isPeaceful();
+    void setOpen(boolean isOpen);
 
-    public void setPeaceful(boolean isPeaceful);
+    boolean isPeaceful();
 
-    public void setPeacefulExplosionsEnabled(boolean val);
+    void setPeaceful(boolean isPeaceful);
 
-    public boolean getPeacefulExplosionsEnabled();
+    void setPeacefulExplosionsEnabled(boolean val);
 
-    public boolean noExplosionsInTerritory();
+    boolean isPeacefulExplosionsEnabled();
 
-    public boolean isPermanent();
+    boolean noExplosionsInTerritory();
 
-    public void setPermanent(boolean isPermanent);
+    boolean isPermanent();
 
-    public String getTag();
+    void setPermanent(boolean isPermanent);
 
-    public String getTag(String prefix);
+    String getTag();
 
-    public String getTag(Faction otherFaction);
+    String getTag(String prefix);
 
-    public String getTag(FPlayer otherFplayer);
+    String getTag(Faction otherFaction);
 
-    public void setTag(String str);
+    String getTag(FPlayer otherFplayer);
 
-    public String getComparisonTag();
+    void setTag(String str);
 
-    public String getDescription();
+    String getComparisonTag();
 
-    public void setDescription(String value);
+    String getDescription();
 
-    public void setHome(Location home);
+    void setDescription(String value);
 
-    public boolean hasHome();
+    void setHome(Location home);
 
-    public Location getHome();
+    boolean hasHome();
 
-    public long getFoundedDate();
+    Location getHome();
 
-    public void setFoundedDate(long newDate);
+    long getFoundedDate();
 
-    public void confirmValidHome();
+    void setFoundedDate(long newDate);
 
-    public String getAccountId();
+    void confirmValidHome();
 
-    public boolean noPvPInTerritory();
+    String getAccountId();
 
-    public boolean noMonstersInTerritory();
+    boolean noPvPInTerritory();
 
-    public boolean isNormal();
+    boolean noMonstersInTerritory();
+
+    boolean isNormal();
 
     @Deprecated
-    public boolean isNone();
+    boolean isNone();
 
-    public boolean isWilderness();
+    boolean isWilderness();
 
-    public boolean isSafeZone();
+    boolean isSafeZone();
 
-    public boolean isWarZone();
+    boolean isWarZone();
 
-    public boolean isPlayerFreeType();
+    boolean isPlayerFreeType();
 
-    public void setLastDeath(long time);
+    void setLastDeath(long time);
 
-    public int getKills();
+    int getKills();
 
-    public int getDeaths();
+    int getDeaths();
 
     // -------------------------------
     // Relation and relation colors
     // -------------------------------
 
     @Override
-    public String describeTo(RelationParticipator that, boolean ucfirst);
+    String describeTo(RelationParticipator that, boolean ucfirst);
 
     @Override
-    public String describeTo(RelationParticipator that);
+    String describeTo(RelationParticipator that);
 
     @Override
-    public Relation getRelationTo(RelationParticipator rp);
+    Relation getRelationTo(RelationParticipator rp);
 
     @Override
-    public Relation getRelationTo(RelationParticipator rp, boolean ignorePeaceful);
+    Relation getRelationTo(RelationParticipator rp, boolean ignorePeaceful);
 
     @Override
-    public ChatColor getColorTo(RelationParticipator rp);
+    ChatColor getColorTo(RelationParticipator rp);
 
-    public Relation getRelationWish(Faction otherFaction);
+    Relation getRelationWish(Faction otherFaction);
 
-    public void setRelationWish(Faction otherFaction, Relation relation);
+    void setRelationWish(Faction otherFaction, Relation relation);
 
-    public int getRelationCount(Relation relation);
+    int getRelationCount(Relation relation);
 
     // ----------------------------------------------//
     // Land
     // ----------------------------------------------//
 
-    public int getLand();
+    int getLand();
 
-    public int getLandInWorld(String worldName);
+    int getLandInWorld(String worldName);
 
-    public int getMaxLand();
+    int getMaxLand();
 
-    public Set<FLocation> getAllClaims();
+    Set<FLocation> getAllClaims();
 
     // ----------------------------------------------//
     // DTR
     // ----------------------------------------------//
 
-    public double getDTR();
+    double getDTR();
 
-    public double getMaxDTR();
+    double getMaxDTR();
 
-    public double getMaxPlayerDTR();
+    double getMaxPlayerDTR();
 
-    public double getMinDTR();
+    double getMinDTR();
 
-    public boolean isFrozen();
+    boolean isFrozen();
 
-    public boolean isRaidable();
+    boolean isRaidable();
 
-    public long getFreezeLeft();
+    long getFreezeLeft();
 
-    public void thaw();
+    void thaw();
 
-    public void setDTR(double dtr);
+    void setDTR(double dtr);
 
-    public void alterDTR(double delta);
+    void alterDTR(double delta);
 
-    public void updateDTR();
+    void updateDTR();
 
     // -------------------------------
     // FPlayers
     // -------------------------------
 
     // maintain the reference list of FPlayers in this faction
-    public void refreshFPlayers();
+    void refreshFPlayers();
 
-    public boolean addFPlayer(FPlayer fplayer);
+    boolean addFPlayer(FPlayer fplayer);
 
-    public boolean removeFPlayer(FPlayer fplayer);
+    boolean removeFPlayer(FPlayer fplayer);
 
-    public int getSize();
+    int getSize();
 
-    public Set<FPlayer> getFPlayers();
+    Set<FPlayer> getFPlayers();
 
-    public Set<FPlayer> getFPlayersWhereOnline(boolean online);
+    Set<FPlayer> getFPlayersWhereOnline(boolean online);
 
-    public FPlayer getFPlayerAdmin();
+    FPlayer getFPlayerAdmin();
 
-    public ArrayList<FPlayer> getFPlayersWhereRole(Role role);
+    ArrayList<FPlayer> getFPlayersWhereRole(Role role);
 
-    public ArrayList<Player> getOnlinePlayers();
+    ArrayList<Player> getOnlinePlayers();
 
     // slightly faster check than getOnlinePlayers() if you just want to see if
     // there are any players online
-    public boolean hasPlayersOnline();
+    boolean hasPlayersOnline();
 
-    public void memberLoggedOff();
+    void memberLoggedOff();
 
     // used when current leader is about to be removed from the faction;
     // promotes new leader, or disbands faction if no other members left
-    public void promoteNewLeader();
+    void promoteNewLeader();
 
     // ----------------------------------------------//
     // Messages
     // ----------------------------------------------//
-    public void msg(String message, Object... args);
+    void msg(String message, Object... args);
 
-    public void sendMessage(String message);
+    void sendMessage(String message);
 
-    public void sendMessage(List<String> messages);
+    void sendMessage(List<String> messages);
 
     // ----------------------------------------------//
     // Ownership of specific claims
     // ----------------------------------------------//
 
-    public Map<FLocation, Set<String>> getClaimOwnership();
+    Map<FLocation, Set<String>> getClaimOwnership();
 
-    public void clearAllClaimOwnership();
+    void clearAllClaimOwnership();
 
-    public void clearClaimOwnership(FLocation loc);
+    void clearClaimOwnership(FLocation loc);
 
-    public void clearClaimOwnership(FPlayer player);
+    void clearClaimOwnership(FPlayer player);
 
-    public int getCountOfClaimsWithOwners();
+    int getCountOfClaimsWithOwners();
 
-    public boolean doesLocationHaveOwnersSet(FLocation loc);
+    boolean doesLocationHaveOwnersSet(FLocation loc);
 
-    public boolean isPlayerInOwnerList(FPlayer player, FLocation loc);
+    boolean isPlayerInOwnerList(FPlayer player, FLocation loc);
 
-    public void setPlayerAsOwner(FPlayer player, FLocation loc);
+    void setPlayerAsOwner(FPlayer player, FLocation loc);
 
-    public void removePlayerAsOwner(FPlayer player, FLocation loc);
+    void removePlayerAsOwner(FPlayer player, FLocation loc);
 
-    public Set<String> getOwnerList(FLocation loc);
+    Set<String> getOwnerList(FLocation loc);
 
-    public String getOwnerListString(FLocation loc);
+    String getOwnerListString(FLocation loc);
 
-    public boolean playerHasOwnershipRights(FPlayer fplayer, FLocation loc);
+    boolean playerHasOwnershipRights(FPlayer fplayer, FLocation loc);
 
     // ----------------------------------------------//
     // Persistance and entity management
     // ----------------------------------------------//
-    public void remove();
+    void remove();
 
-    public void setId(String id);
+    void setId(String id);
 }

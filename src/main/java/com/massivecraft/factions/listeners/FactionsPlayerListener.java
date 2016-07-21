@@ -49,7 +49,7 @@ public class FactionsPlayerListener implements Listener {
     }
 
     private void initPlayer(Player player) {
-        final MemoryFPlayer fme = (MemoryFPlayer) FPlayers.getInstance().getByPlayer(player);
+        final MemoryFPlayer fme = (MemoryFPlayer) FPlayers.getInstance().login(player);
 
         fme.setName(player.getName());
         fme.setOnline(true);
@@ -96,7 +96,7 @@ public class FactionsPlayerListener implements Listener {
 
     @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        FPlayer me = FPlayers.getInstance().getByPlayer(event.getPlayer());
+        FPlayer me = FPlayers.getInstance().logout(event.getPlayer());
 
         // and update their last login time to point to when the logged off, for auto-remove routine
         me.setLastLoginTime(System.currentTimeMillis());

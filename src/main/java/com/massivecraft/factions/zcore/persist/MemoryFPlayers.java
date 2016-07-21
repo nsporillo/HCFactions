@@ -4,14 +4,16 @@ import com.massivecraft.factions.FPlayer;
 import com.massivecraft.factions.FPlayers;
 import com.massivecraft.factions.Factions;
 import com.massivecraft.factions.P;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public abstract class MemoryFPlayers extends FPlayers {
+
+    private Set<FPlayer> onlinePlayers = Collections.newSetFromMap(new ConcurrentHashMap<>());
     public Map<String, FPlayer> fPlayers = new ConcurrentSkipListMap<String, FPlayer>(String.CASE_INSENSITIVE_ORDER);
 
     public void clean() {
@@ -23,12 +25,20 @@ public abstract class MemoryFPlayers extends FPlayers {
         }
     }
 
+    public FPlayer login(Player player) {
+        FPlayer fPlayer = getByPlayer(player);
+        onlinePlayers.add(fPlayer);
+        return fPlayer;
+    }
+
+    public FPlayer logout(Player player) {
+        FPlayer fPlayer = getByPlayer(player);
+        onlinePlayers.remove(fPlayer);
+        return fPlayer;
+    }
+
     public Collection<FPlayer> getOnlinePlayers() {
-        Set<FPlayer> entities = new HashSet<FPlayer>();
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            entities.add(this.getByPlayer(player));
-        }
-        return entities;
+        return onlinePlayers;
     }
 
     @Override

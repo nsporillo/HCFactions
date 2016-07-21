@@ -23,6 +23,10 @@ public abstract class FPlayers {
         return null;
     }
 
+    public abstract FPlayer login(Player player);
+
+    public abstract FPlayer logout(Player player);
+
     public abstract Collection<FPlayer> getOnlinePlayers();
 
     public abstract FPlayer getByPlayer(Player player);

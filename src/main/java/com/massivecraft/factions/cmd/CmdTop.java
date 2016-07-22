@@ -43,106 +43,88 @@ public class CmdTop extends FCommand {
 
         String criteria = argAsString(0);
 
-        // TODO: Better way to sort?
         if (criteria.equalsIgnoreCase("members")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    int f1Size = f1.getFPlayers().size();
-                    int f2Size = f2.getFPlayers().size();
-                    if (f1Size < f2Size) {
-                        return 1;
-                    } else if (f1Size > f2Size) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                int f1Size = f1.getFPlayers().size();
+                int f2Size = f2.getFPlayers().size();
+
+                if (f1Size < f2Size) {
+                    return 1;
+                } else if (f1Size > f2Size) {
+                    return -1;
                 }
+                return 0;
             });
         } else if (criteria.equalsIgnoreCase("dtr")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    double f1dtr = f1.getDTR();
-                    double f2dtr = f2.getDTR();
-                    if (f1dtr < f2dtr) {
-                        return 1;
-                    } else if (f1dtr > f2dtr) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                double f1dtr = f1.getDTR();
+                double f2dtr = f2.getDTR();
+                if (f1dtr < f2dtr) {
+                    return 1;
+                } else if (f1dtr > f2dtr) {
+                    return -1;
                 }
+                return 0;
             });
         } else if (criteria.equalsIgnoreCase("land")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    int f1Size = f1.getLand();
-                    int f2Size = f2.getLand();
-                    if (f1Size < f2Size) {
-                        return 1;
-                    } else if (f1Size > f2Size) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                int f1Size = f1.getLand();
+                int f2Size = f2.getLand();
+                if (f1Size < f2Size) {
+                    return 1;
+                } else if (f1Size > f2Size) {
+                    return -1;
                 }
+                return 0;
             });
         } else if (criteria.equalsIgnoreCase("start")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    long f1start = f1.getFoundedDate();
-                    long f2start = f2.getFoundedDate();
-                    // flip signs because a smaller date is further in the past
-                    if (f1start > f2start) {
-                        return 1;
-                    } else if (f1start < f2start) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                long f1start = f1.getFoundedDate();
+                long f2start = f2.getFoundedDate();
+                // flip signs because a smaller date is further in the past
+                if (f1start > f2start) {
+                    return 1;
+                } else if (f1start < f2start) {
+                    return -1;
                 }
+                return 0;
             });
         } else if (criteria.equalsIgnoreCase("online")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    int f1Size = f1.getFPlayersWhereOnline(true).size();
-                    int f2Size = f2.getFPlayersWhereOnline(true).size();
-                    if (f1Size < f2Size) {
-                        return 1;
-                    } else if (f1Size > f2Size) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                int f1Size = f1.getFPlayersWhereOnline(true).size();
+                int f2Size = f2.getFPlayersWhereOnline(true).size();
+                if (f1Size < f2Size) {
+                    return 1;
+                } else if (f1Size > f2Size) {
+                    return -1;
                 }
+                return 0;
             });
         } else if (Econ.isSetup() && criteria.equalsIgnoreCase("money") || criteria.equalsIgnoreCase("balance") || criteria.equalsIgnoreCase("bal")) {
-            Collections.sort(factionList, new Comparator<Faction>() {
-                @Override
-                public int compare(Faction f1, Faction f2) {
-                    double f1Size = Econ.getBalance(f1.getAccountId());
-                    for (FPlayer fp : f1.getFPlayers()) {
-                        f1Size = f1Size + Econ.getBalance(fp);
-                    }
-
-                    double f2Size = Econ.getBalance(f2.getAccountId());
-                    for (FPlayer fp : f2.getFPlayers()) {
-                        f2Size = f2Size + Econ.getBalance(fp);
-                    }
-
-                    if (f1Size < f2Size) {
-                        return 1;
-                    } else if (f1Size > f2Size) {
-                        return -1;
-                    }
-                    return 0;
+            Collections.sort(factionList, (f1, f2) -> {
+                double f1Size = Econ.getBalance(f1.getAccountId());
+                for (FPlayer fp : f1.getFPlayers()) {
+                    f1Size = f1Size + Econ.getBalance(fp);
                 }
+
+                double f2Size = Econ.getBalance(f2.getAccountId());
+                for (FPlayer fp : f2.getFPlayers()) {
+                    f2Size = f2Size + Econ.getBalance(fp);
+                }
+
+                if (f1Size < f2Size) {
+                    return 1;
+                } else if (f1Size > f2Size) {
+                    return -1;
+                }
+                return 0;
             });
         } else {
             msg(TL.COMMAND_TOP_INVALID, criteria);
             return;
         }
 
-        ArrayList<String> lines = new ArrayList<>();
+        List<String> lines = new ArrayList<>();
 
         final int pageheight = 9;
         int pagenumber = this.argAsInt(1, 1);
@@ -162,6 +144,7 @@ public class CmdTop extends FCommand {
         lines.add(TL.COMMAND_TOP_TOP.format(criteria.toUpperCase(), pagenumber, pagecount));
 
         int rank = 1;
+
         for (Faction faction : factionList.subList(start, end)) {
             // Get the relation color if player is executing this.
             String fac = sender instanceof Player ? faction.getRelationTo(fme).getColor() + faction.getTag() : faction.getTag();

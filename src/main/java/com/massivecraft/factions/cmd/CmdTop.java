@@ -25,6 +25,7 @@ public class CmdTop extends FCommand {
 
         this.permission = Permission.TOP.node;
         this.disableOnLock = false;
+        this.async = true; // This is a statistics cmd essentially, run async!
 
         senderMustBePlayer = false;
         senderMustBeMember = false;
@@ -36,7 +37,7 @@ public class CmdTop extends FCommand {
     public void perform() {
         // Can sort by: money, members, online, allies, enemies, dtr, land.
         // Get all Factions and remove non player ones.
-        List<Faction> factionList = Factions.getInstance().getAllFactions();
+        final List<Faction> factionList = Factions.getInstance().getAllFactions();
         factionList.remove(Factions.getInstance().getNone());
         factionList.remove(Factions.getInstance().getSafeZone());
         factionList.remove(Factions.getInstance().getWarZone());
@@ -129,6 +130,7 @@ public class CmdTop extends FCommand {
         final int pageheight = 9;
         int pagenumber = this.argAsInt(1, 1);
         int pagecount = (factionList.size() / pageheight) + 1;
+
         if (pagenumber > pagecount) {
             pagenumber = pagecount;
         } else if (pagenumber < 1) {
@@ -168,9 +170,11 @@ public class CmdTop extends FCommand {
             return TL.sdf.format(faction.getFoundedDate());
         } else { // Last one is balance, and it has 3 different things it could be.
             double balance = Econ.getBalance(faction.getAccountId());
+
             for (FPlayer fp : faction.getFPlayers()) {
-                balance = balance + Econ.getBalance(fp.getAccountId());
+                balance = balance + Econ.getBalance(fp);
             }
+
             return String.valueOf(balance);
         }
     }

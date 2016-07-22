@@ -1,6 +1,5 @@
 package com.massivecraft.factions.zcore.persist.json;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -40,23 +39,14 @@ public class JSONFPlayers extends MemoryFPlayers {
     }
 
     public void convertFrom(MemoryFPlayers old) {
-        this.fPlayers.putAll(Maps.transformValues(old.fPlayers, new Function<FPlayer, JSONFPlayer>() {
-            @Override
-            public JSONFPlayer apply(FPlayer arg0) {
-                return new JSONFPlayer((MemoryFPlayer) arg0);
-            }
-        }));
+        this.fPlayers.putAll(Maps.transformValues(old.fPlayers, arg0 -> new JSONFPlayer((MemoryFPlayer) arg0)));
         forceSave(true);
         FPlayers.instance = this;
     }
 
     public void forceSave(boolean sync) {
-        Map<String, JSONFPlayer> entitiesThatShouldBeSaved = new HashMap<String, JSONFPlayer>();
-        for (FPlayer entity : this.fPlayers.values()) {
-            if (((MemoryFPlayer) entity).shouldBeSaved()) {
-                entitiesThatShouldBeSaved.put(entity.getId(), (JSONFPlayer) entity);
-            }
-        }
+        Map<String, JSONFPlayer> entitiesThatShouldBeSaved = new HashMap<>();
+        this.fPlayers.values().stream().filter(entity -> ((MemoryFPlayer) entity).shouldBeSaved()).forEach(entity -> entitiesThatShouldBeSaved.put(entity.getId(), (JSONFPlayer) entity));
         this.saveCore(this.file, entitiesThatShouldBeSaved, sync);
     }
 
@@ -80,7 +70,7 @@ public class JSONFPlayers extends MemoryFPlayers {
 
     private Map<String, JSONFPlayer> loadCore() {
         if (!this.file.exists()) {
-            return new HashMap<String, JSONFPlayer>();
+            return new HashMap<>();
         }
 
         String content = DiscUtil.readCatch(this.file);
@@ -88,13 +78,14 @@ public class JSONFPlayers extends MemoryFPlayers {
             return null;
         }
 
-        Map<String, JSONFPlayer> data = this.gson.fromJson(content, new TypeToken<Map<String, JSONFPlayer>>() {
-        }.getType());
-        Set<String> list = new HashSet<String>();
-        Set<String> invalidList = new HashSet<String>();
+        Map<String, JSONFPlayer> data = this.gson.fromJson(content, new TypeToken<Map<String, JSONFPlayer>>() {}.getType());
+        Set<String> list = new HashSet<>();
+        Set<String> invalidList = new HashSet<>();
+
         for (Entry<String, JSONFPlayer> entry : data.entrySet()) {
             String key = entry.getKey();
             entry.getValue().setId(key);
+
             if (doesKeyNeedMigration(key)) {
                 if (!isKeyInvalid(key)) {
                     list.add(key);
@@ -111,16 +102,19 @@ public class JSONFPlayers extends MemoryFPlayers {
             // First we'll make a backup, because god forbid anybody heed a
             // warning
             File file = new File(this.file.getParentFile(), "players.json.old");
+
             try {
                 file.createNewFile();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            saveCore(file, (Map<String, JSONFPlayer>) data);
+
+            saveCore(file, data);
             Bukkit.getLogger().log(Level.INFO, "Backed up your old data at " + file.getAbsolutePath());
 
             // Start fetching those UUIDs
             Bukkit.getLogger().log(Level.INFO, "Please wait while Factions converts " + list.size() + " old player names to UUID. This may take a while.");
+
             UUIDFetcher fetcher = new UUIDFetcher(new ArrayList(list));
             try {
                 Map<String, UUID> response = fetcher.call();
@@ -131,6 +125,7 @@ public class JSONFPlayers extends MemoryFPlayers {
                         invalidList.add(s);
                     }
                 }
+
                 for (String value : response.keySet()) {
                     // For all the valid responses, let's replace their old
                     // named entry with a UUID key
@@ -152,19 +147,18 @@ public class JSONFPlayers extends MemoryFPlayers {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             if (invalidList.size() > 0) {
-                for (String name : invalidList) {
-                    // Remove all the invalid names we collected
-                    data.remove(name);
-                }
+                invalidList.forEach(data::remove);// Remove all the invalid names we collected
                 Bukkit.getLogger().log(Level.INFO, "While converting we found names that either don't have a UUID or aren't players and removed them from storage.");
                 Bukkit.getLogger().log(Level.INFO, "The following names were detected as being invalid: " + StringUtils.join(invalidList, ", "));
             }
-            saveCore(this.file, (Map<String, JSONFPlayer>) data); // Update the
+
+            saveCore(this.file, data); // Update the
             // flatfile
             Bukkit.getLogger().log(Level.INFO, "Done converting players.json to UUID.");
         }
-        return (Map<String, JSONFPlayer>) data;
+        return data;
     }
 
     private boolean doesKeyNeedMigration(String key) {

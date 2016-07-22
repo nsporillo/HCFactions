@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
 public abstract class MemoryFPlayers extends FPlayers {
 
     private Set<FPlayer> onlinePlayers = Collections.newSetFromMap(new ConcurrentHashMap<>());
-    public Map<String, FPlayer> fPlayers = new ConcurrentSkipListMap<String, FPlayer>(String.CASE_INSENSITIVE_ORDER);
+    public Map<String, FPlayer> fPlayers = new ConcurrentSkipListMap<>(String.CASE_INSENSITIVE_ORDER);
 
     public void clean() {
         for (FPlayer fplayer : this.fPlayers.values()) {

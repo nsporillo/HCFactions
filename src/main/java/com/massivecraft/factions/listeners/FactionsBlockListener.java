@@ -62,20 +62,21 @@ public class FactionsBlockListener implements Listener {
         if (material == Material.SOIL) {
             if (event.getEntity() instanceof Horse) {
                 Entity passenger = event.getEntity().getPassenger();
+
                 if (passenger != null && passenger instanceof Player) {
                     Player player = (Player) passenger;
                     Faction faction = Board.getInstance().getFactionAt(new FLocation(event.getBlock()));
                     FPlayer fplayer = FPlayers.getInstance().getByPlayer(player);
                     Relation rel = fplayer.getRelationTo(faction);
-                    if (faction.isNormal() && rel.isAtMost(Relation.NEUTRAL)) {
-                        if (rel.confDenyUseage()) {
-                            Faction myFaction = fplayer.getFaction();
-                            fplayer.msg(TL.PLAYER_USE_TERRITORY, (material == Material.SOIL ? "trample " : "use ") + TextUtil.getMaterialName(material), faction.getTag(myFaction));
-                            event.setCancelled(true);
-                        }
+
+                    if (faction.isNormal() && rel.isAtMost(Relation.NEUTRAL) && rel.confDenyUseage()) {
+                        Faction myFaction = fplayer.getFaction();
+                        fplayer.msg(TL.PLAYER_USE_TERRITORY, (material == Material.SOIL ? "trample " : "use ") + TextUtil.getMaterialName(material), faction.getTag(myFaction));
+                        event.setCancelled(true);
                     }
                 } else {
                     Faction faction = Board.getInstance().getFactionAt(new FLocation(event.getBlock()));
+
                     if (faction.isNormal()) {
                         event.setCancelled(true);
                     }
@@ -89,19 +90,23 @@ public class FactionsBlockListener implements Listener {
         if (!Conf.handleExploitLiquidFlow) {
             return;
         }
+
         if (event.getBlock().isLiquid()) {
             if (event.getToBlock().isEmpty()) {
                 Faction from = Board.getInstance().getFactionAt(new FLocation(event.getBlock()));
                 Faction to = Board.getInstance().getFactionAt(new FLocation(event.getToBlock()));
+
                 if (from == to) {
                     // not concerned with inter-faction events
                     return;
                 }
+
                 // from faction != to faction and to faction isn't raidable, cancel :)
                 if (to.isNormal() && !to.isRaidable()) {
                     if (from.isNormal() && from.getRelationTo(to).isAlly()) {
                         return;
                     }
+
                     event.setCancelled(true);
                 }
             }
@@ -181,11 +186,13 @@ public class FactionsBlockListener implements Listener {
 
     public static boolean playerCanBuildDestroyBlock(Player player, Location location, String action, boolean justCheck) {
         String name = player.getName();
+
         if (Conf.playersWhoBypassAllProtection.contains(name)) {
             return true;
         }
 
         FPlayer me = FPlayers.getInstance().getById(player.getUniqueId().toString());
+
         if (me.isAdminBypassing()) {
             return true;
         }
@@ -197,20 +204,25 @@ public class FactionsBlockListener implements Listener {
             if (Conf.worldGuardBuildPriority && Worldguard.playerCanBuild(player, location)) {
                 return true;
             }
+
             if (!Conf.wildernessDenyBuild || Conf.worldsNoWildernessProtection.contains(location.getWorld().getName())) {
                 return true; // This is not faction territory. Use whatever you like here.
             }
+
             if (!justCheck) {
                 me.msg(TL.PLAYER_ACTION_ZONE, action, TL.WILDERNESS.toString());
             }
+
             return false;
         } else if (otherFaction.isSafeZone()) {
             if (Conf.worldGuardBuildPriority && Worldguard.playerCanBuild(player, location)) {
                 return true;
             }
+
             if (!Conf.safeZoneDenyBuild || Permission.MANAGE_SAFE_ZONE.has(player)) {
                 return true;
             }
+
             if (!justCheck) {
                 me.msg(TL.PLAYER_ACTION_ZONE, action, TL.SAFEZONE.toString());
             }
@@ -219,12 +231,15 @@ public class FactionsBlockListener implements Listener {
             if (Conf.worldGuardBuildPriority && Worldguard.playerCanBuild(player, location)) {
                 return true;
             }
+
             if (!Conf.warZoneDenyBuild || Permission.MANAGE_WAR_ZONE.has(player)) {
                 return true;
             }
+
             if (!justCheck) {
                 me.msg(TL.PLAYER_ACTION_ZONE, action, TL.WARZONE.toString());
             }
+
             return false;
         }
         // is faction raidable? 
@@ -251,6 +266,7 @@ public class FactionsBlockListener implements Listener {
             if (!justCheck) {
                 me.msg(TL.PLAYER_ACTION_CLAIM, action, otherFaction.getTag(myFaction));
             }
+
             return false;
         }
 
@@ -267,9 +283,11 @@ public class FactionsBlockListener implements Listener {
                 if (!justCheck) {
                     me.msg(TL.PLAYER_ACTION_CLAIM, action, otherFaction.getTag(myFaction));
                 }
+
                 return false;
             }
         }
+
         return true;
     }
 }

@@ -60,6 +60,7 @@ public class FactionsEntityListener implements Listener {
                 dtrEvent.setMessage(TL.PLAYER_DTR_NOLOSS_WARZONE.toString());
                 dtrEvent.setCancelled(true);
             }
+
             if (Conf.worldsNoDtrLoss.contains(player.getWorld().getName())) {
                 dtrEvent.setMessage(TL.PLAYER_DTR_LOSS_WARZONE.toString());
             }
@@ -85,6 +86,7 @@ public class FactionsEntityListener implements Listener {
         if (!dtrEvent.isCancelled()) {
             fplayer.onDeath(entity.getWorld().getName());
             Faction disFac = fplayer.getFaction();
+
             for (FPlayer member : disFac.getFPlayersWhereOnline(true)) {
                 member.msg(TL.FACTION_DEATH, fplayer.getName(), TL.dc.format(disFac.getDTR()), TL.dc.format(disFac.getMaxDTR()));
             }
@@ -130,7 +132,9 @@ public class FactionsEntityListener implements Listener {
     public void cancelFStuckTeleport(Player player) {
         if (player == null)
             return;
+
         UUID uuid = player.getUniqueId();
+
         if (P.p.getStuckRequestMap().containsKey(uuid)) {
             FPlayers.getInstance().getByPlayer(player).msg(TL.COMMAND_STUCK_CANCELLED);
             P.p.getStuckRequestMap().get(uuid).cancel();
@@ -198,13 +202,13 @@ public class FactionsEntityListener implements Listener {
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onEntityCombustByEntity(EntityCombustByEntityEvent event) {
         EntityDamageByEntityEvent sub = new EntityDamageByEntityEvent(event.getCombuster(), event.getEntity(), EntityDamageEvent.DamageCause.FIRE, 0);
+
         if (!this.canDamagerHurtDamagee(sub, false)) {
             event.setCancelled(true);
         }
-        sub = null;
     }
 
-    private static final Set<PotionEffectType> badPotionEffects = new LinkedHashSet<PotionEffectType>(Arrays.asList(PotionEffectType.BLINDNESS, PotionEffectType.CONFUSION, PotionEffectType.HARM, PotionEffectType.HUNGER, PotionEffectType.POISON, PotionEffectType.SLOW, PotionEffectType.SLOW_DIGGING, PotionEffectType.WEAKNESS, PotionEffectType.WITHER));
+    private static final Set<PotionEffectType> badPotionEffects = new LinkedHashSet<>(Arrays.asList(PotionEffectType.BLINDNESS, PotionEffectType.CONFUSION, PotionEffectType.HARM, PotionEffectType.HUNGER, PotionEffectType.POISON, PotionEffectType.SLOW, PotionEffectType.SLOW_DIGGING, PotionEffectType.WEAKNESS, PotionEffectType.WITHER));
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPotionSplashEvent(PotionSplashEvent event) {
@@ -236,13 +240,14 @@ public class FactionsEntityListener implements Listener {
 
         // scan through affected entities to make sure they're all valid targets
         Iterator<LivingEntity> iter = event.getAffectedEntities().iterator();
+
         while (iter.hasNext()) {
             LivingEntity target = iter.next();
             EntityDamageByEntityEvent sub = new EntityDamageByEntityEvent((Entity) thrower, target, EntityDamageEvent.DamageCause.CUSTOM, 0);
+
             if (!this.canDamagerHurtDamagee(sub, true)) {
                 event.setIntensity(target, 0.0);  // affected entity list doesn't accept modification (so no iter.remove()), but this works
             }
-            sub = null;
         }
     }
 

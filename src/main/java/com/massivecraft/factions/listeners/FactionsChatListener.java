@@ -116,6 +116,7 @@ public class FactionsChatListener implements Listener {
             if (eventFormat.contains("[FACTION_TITLE]")) {
                 eventFormat = eventFormat.replace("[FACTION_TITLE]", me.getTitle());
             }
+
             InsertIndex = eventFormat.indexOf(Conf.chatTagReplaceString);
             eventFormat = eventFormat.replace(Conf.chatTagReplaceString, "");
             Conf.chatTagPadAfter = false;

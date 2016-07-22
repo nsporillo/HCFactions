@@ -3,6 +3,7 @@ package com.massivecraft.factions;
 import com.massivecraft.factions.zcore.persist.json.JSONFactions;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 public abstract class Factions {
@@ -24,7 +25,7 @@ public abstract class Factions {
 
     public abstract Set<String> getFactionTags();
 
-    public abstract ArrayList<Faction> getAllFactions();
+    public abstract List<Faction> getAllFactions();
 
     public abstract Faction getNone();
 

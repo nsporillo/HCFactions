@@ -7,13 +7,15 @@ import com.massivecraft.factions.zcore.util.TL;
 import org.bukkit.ChatColor;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public abstract class MemoryFactions extends Factions {
-    public Map<String, Faction> factions = new ConcurrentHashMap<String, Faction>();
+
+    public Map<String, Faction> factions = new ConcurrentHashMap<>();
     public int nextId = 1;
 
     public void load() {
@@ -25,9 +27,11 @@ public abstract class MemoryFactions extends Factions {
             faction.setDescription(TL.WILDERNESS_DESCRIPTION.toString());
         } else {
             Faction faction = factions.get("0");
+
             if (!faction.getTag().equalsIgnoreCase(TL.WILDERNESS.toString())) {
                 faction.setTag(TL.WILDERNESS.toString());
             }
+
             if (!faction.getDescription().equalsIgnoreCase(TL.WILDERNESS_DESCRIPTION.toString())) {
                 faction.setDescription(TL.WILDERNESS_DESCRIPTION.toString());
             }
@@ -41,12 +45,15 @@ public abstract class MemoryFactions extends Factions {
             faction.setDescription(TL.SAFEZONE_DESCRIPTION.toString());
         } else {
             Faction faction = factions.get("-1");
+
             if (!faction.getTag().equalsIgnoreCase(TL.SAFEZONE.toString())) {
                 faction.setTag(TL.SAFEZONE.toString());
             }
+
             if (!faction.getDescription().equalsIgnoreCase(TL.SAFEZONE_DESCRIPTION.toString())) {
                 faction.setDescription(TL.SAFEZONE_DESCRIPTION.toString());
             }
+
             // if SafeZone has old pre-1.6.0 name, rename it to remove troublesome " "
             if (faction.getTag().contains(" ")) {
                 faction.setTag(TL.SAFEZONE.toString());
@@ -61,12 +68,15 @@ public abstract class MemoryFactions extends Factions {
             faction.setDescription(TL.WARZONE_DESCRIPTION.toString());
         } else {
             Faction faction = factions.get("-2");
+
             if (!faction.getTag().equalsIgnoreCase(TL.WARZONE.toString())) {
                 faction.setTag(TL.WARZONE.toString());
             }
+
             if (!faction.getDescription().equalsIgnoreCase(TL.WARZONE_DESCRIPTION.toString())) {
                 faction.setDescription(TL.WARZONE_DESCRIPTION.toString());
             }
+
             // if WarZone has old pre-1.6.0 name, rename it to remove troublesome " "
             if (faction.getTag().contains(" ")) {
                 faction.setTag(TL.WARZONE.toString());
@@ -95,21 +105,26 @@ public abstract class MemoryFactions extends Factions {
         start = start.toLowerCase();
         int minlength = start.length();
         Faction bestMatch = null;
+
         for (Faction faction : factions.values()) {
             String candidate = faction.getTag();
             candidate = ChatColor.stripColor(candidate);
+
             if (candidate.length() < minlength) {
                 continue;
             }
+
             if (!candidate.toLowerCase().startsWith(start)) {
                 continue;
             }
 
             // The closer to zero the better
             int lendiff = candidate.length() - minlength;
+
             if (lendiff == 0) {
                 return faction;
             }
+
             if (lendiff < best || best == 0) {
                 best = lendiff;
                 bestMatch = faction;
@@ -134,11 +149,7 @@ public abstract class MemoryFactions extends Factions {
     }
 
     public Set<String> getFactionTags() {
-        Set<String> tags = new HashSet<String>();
-        for (Faction faction : factions.values()) {
-            tags.add(faction.getTag());
-        }
-        return tags;
+        return factions.values().stream().map(Faction::getTag).collect(Collectors.toSet());
     }
 
     public abstract Faction generateFactionObject();
@@ -148,8 +159,8 @@ public abstract class MemoryFactions extends Factions {
     }
 
     @Override
-    public ArrayList<Faction> getAllFactions() {
-        return new ArrayList<Faction>(factions.values());
+    public List<Faction> getAllFactions() {
+        return new ArrayList<>(factions.values());
     }
 
     @Override

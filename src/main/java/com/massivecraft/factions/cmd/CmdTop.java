@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class CmdTop extends FCommand {
 
@@ -35,7 +36,7 @@ public class CmdTop extends FCommand {
     public void perform() {
         // Can sort by: money, members, online, allies, enemies, dtr, land.
         // Get all Factions and remove non player ones.
-        ArrayList<Faction> factionList = Factions.getInstance().getAllFactions();
+        List<Faction> factionList = Factions.getInstance().getAllFactions();
         factionList.remove(Factions.getInstance().getNone());
         factionList.remove(Factions.getInstance().getSafeZone());
         factionList.remove(Factions.getInstance().getWarZone());
@@ -119,14 +120,15 @@ public class CmdTop extends FCommand {
                 @Override
                 public int compare(Faction f1, Faction f2) {
                     double f1Size = Econ.getBalance(f1.getAccountId());
-                    // Lets get the balance of /all/ the players in the Faction.
                     for (FPlayer fp : f1.getFPlayers()) {
-                        f1Size = f1Size + Econ.getBalance(fp.getAccountId());
+                        f1Size = f1Size + Econ.getBalance(fp);
                     }
+
                     double f2Size = Econ.getBalance(f2.getAccountId());
                     for (FPlayer fp : f2.getFPlayers()) {
-                        f2Size = f2Size + Econ.getBalance(fp.getAccountId());
+                        f2Size = f2Size + Econ.getBalance(fp);
                     }
+
                     if (f1Size < f2Size) {
                         return 1;
                     } else if (f1Size > f2Size) {

@@ -10,6 +10,7 @@ import com.massivecraft.factions.zcore.util.TagUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 
 public class CmdList extends FCommand {
@@ -38,7 +39,7 @@ public class CmdList extends FCommand {
             return;
         }
 
-        ArrayList<Faction> factionList = Factions.getInstance().getAllFactions();
+        List<Faction> factionList = Factions.getInstance().getAllFactions();
         factionList.remove(Factions.getInstance().getNone());
         factionList.remove(Factions.getInstance().getSafeZone());
         factionList.remove(Factions.getInstance().getWarZone());

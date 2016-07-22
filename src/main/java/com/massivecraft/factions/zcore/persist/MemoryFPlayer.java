@@ -21,10 +21,7 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Logged in players always have exactly one FPlayer instance. Logged out players may or may not have an FPlayer
@@ -736,6 +733,10 @@ public abstract class MemoryFPlayer implements FPlayer {
 
     public Player getPlayer() {
         return Bukkit.getPlayer(this.getUUID());
+    }
+
+    public Set<FPlayer> getFPlayers() {
+        return Collections.singleton(this);
     }
 
     // make sure target player should be able to detect that this player is online

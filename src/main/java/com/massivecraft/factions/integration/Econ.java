@@ -1,9 +1,6 @@
 package com.massivecraft.factions.integration;
 
-import com.massivecraft.factions.Conf;
-import com.massivecraft.factions.FPlayer;
-import com.massivecraft.factions.Faction;
-import com.massivecraft.factions.P;
+import com.massivecraft.factions.*;
 import com.massivecraft.factions.iface.EconomyParticipator;
 import com.massivecraft.factions.struct.Permission;
 import com.massivecraft.factions.struct.Role;
@@ -12,17 +9,37 @@ import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 public class Econ {
 
+    private static Map<String, Double> balances = new ConcurrentHashMap<>();
     private static Economy econ = null;
+
+    /**
+     * Async thread to synchronize balances to memory
+     * Useful for non-mission critical access to a players balance
+     * At worst is 1 second out of date.
+     */
+    private static class BalanceUpdate extends BukkitRunnable {
+
+        @Override
+        public void run() {
+            for (FPlayer player : FPlayers.getInstance().getOnlinePlayers()) {
+                balances.put(player.getId(), Econ.getBalance(player.getAccountId()));
+            }
+        }
+    }
 
     public static void setup() {
         if (isSetup()) {
@@ -50,6 +67,8 @@ public class Econ {
         }
 
         P.p.cmdBase.cmdHelp.updateHelp();
+
+        new BalanceUpdate().runTaskTimerAsynchronously(P.p, 20L, 20L);
     }
 
     public static boolean shouldBeUsed() {
@@ -211,17 +230,7 @@ public class Econ {
     }
 
     public static Set<FPlayer> getFplayers(EconomyParticipator ep) {
-        Set<FPlayer> fplayers = new HashSet<FPlayer>();
-
-        if (ep != null) {
-            if (ep instanceof FPlayer) {
-                fplayers.add((FPlayer) ep);
-            } else if (ep instanceof Faction) {
-                fplayers.addAll(((Faction) ep).getFPlayers());
-            }
-        }
-
-        return fplayers;
+        return ep != null ? ep.getFPlayers() : new HashSet<>();
     }
 
     public static void sendTransferInfo(EconomyParticipator invoker, EconomyParticipator from, EconomyParticipator to, double amount) {
@@ -384,6 +393,14 @@ public class Econ {
     // -------------------------------------------- //
     // Standard account management methods
     // -------------------------------------------- //
+
+    public static double getBalance(FPlayer player) {
+        if (balances.containsKey(player.getId())) {
+            return balances.get(player.getId());
+        } else {
+            return getBalance(player.getAccountId());
+        }
+    }
 
     public static boolean hasAccount(String name) {
         return econ.hasAccount(name);

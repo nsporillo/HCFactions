@@ -2,15 +2,18 @@ package com.massivecraft.factions.zcore;
 
 import com.massivecraft.factions.zcore.util.TL;
 import com.massivecraft.factions.zcore.util.TextUtil;
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
+import java.util.stream.Collectors;
 
 public abstract class MCommand<T extends MPlugin> {
 
@@ -37,11 +40,7 @@ public abstract class MCommand<T extends MPlugin> {
     // FIELD: Help Short
     // This field may be left blank and will in such case be loaded from the permissions node instead.
     // Thus make sure the permissions node description is an action description like "eat hamburgers" or "do admin stuff".
-    private String helpShort;
-
-    public void setHelpShort(String val) {
-        this.helpShort = val;
-    }
+    @Setter private String helpShort;
 
     public String getHelpShort() {
         if (this.helpShort == null) {
@@ -63,9 +62,9 @@ public abstract class MCommand<T extends MPlugin> {
     // Information available on execution of the command
     public CommandSender sender; // Will always be set
     public Player me; // Will only be set when the sender is a player
-    public boolean senderIsConsole;
+    @Getter @Setter public boolean senderIsConsole, async;
     public List<String> args; // Will contain the arguments, or and empty list if there are none.
-    public List<MCommand<?>> commandChain = new ArrayList<MCommand<?>>(); // The command chain used to execute this command
+    public List<MCommand<?>> commandChain = new ArrayList<>(); // The command chain used to execute this command
 
     public MCommand(T p) {
         this.p = p;
@@ -74,14 +73,14 @@ public abstract class MCommand<T extends MPlugin> {
 
         this.allowNoSlashAccess = false;
 
-        this.subCommands = new ArrayList<MCommand<?>>();
-        this.aliases = new ArrayList<String>();
+        this.subCommands = new ArrayList<>();
+        this.aliases = new ArrayList<>();
 
-        this.requiredArgs = new ArrayList<String>();
-        this.optionalArgs = new LinkedHashMap<String, String>();
+        this.requiredArgs = new ArrayList<>();
+        this.optionalArgs = new LinkedHashMap<>();
 
         this.helpShort = null;
-        this.helpLong = new ArrayList<String>();
+        this.helpLong = new ArrayList<>();
         this.visibility = CommandVisibility.VISIBLE;
     }
 
@@ -96,6 +95,7 @@ public abstract class MCommand<T extends MPlugin> {
             this.me = null;
             this.senderIsConsole = true;
         }
+
         this.args = args;
         this.commandChain = commandChain;
 
@@ -119,11 +119,21 @@ public abstract class MCommand<T extends MPlugin> {
             return;
         }
 
-        perform();
+        /* Allows us to perform a command entirely async if we want*/
+        if (async) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    perform();
+                }
+            }.runTaskAsynchronously(p);
+        } else {
+            perform();
+        }
     }
 
     public void execute(CommandSender sender, List<String> args) {
-        execute(sender, args, new ArrayList<MCommand<?>>());
+        execute(sender, args, new ArrayList<>());
     }
 
     // This is where the command action is performed.
@@ -202,11 +212,7 @@ public abstract class MCommand<T extends MPlugin> {
 
         ret.append(TextUtil.implode(this.aliases, ","));
 
-        List<String> args = new ArrayList<String>();
-
-        for (String requiredArg : this.requiredArgs) {
-            args.add("<" + requiredArg + ">");
-        }
+        List<String> args = this.requiredArgs.stream().map(requiredArg -> "<" + requiredArg + ">").collect(Collectors.toList());
 
         for (Entry<String, String> optionalArg : this.optionalArgs.entrySet()) {
             String val = optionalArg.getValue();
@@ -215,6 +221,7 @@ public abstract class MCommand<T extends MPlugin> {
             } else {
                 val = "=" + val;
             }
+
             args.add("[" + optionalArg.getKey() + val + "]");
         }
 

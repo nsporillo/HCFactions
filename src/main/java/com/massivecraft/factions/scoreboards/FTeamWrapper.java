@@ -270,7 +270,9 @@ public class FTeamWrapper {
     private void addPlayer(OfflinePlayer player) {
         if (members.add(player)) {
             for (Team team : teams.values()) {
-                team.addEntry(player.getName());
+                if (!team.hasEntry(player.getName())) {
+                    team.addEntry(player.getName());
+                }
             }
         }
     }
@@ -278,7 +280,9 @@ public class FTeamWrapper {
     private void removePlayer(OfflinePlayer player) {
         if (members.remove(player)) {
             for (Team team : teams.values()) {
-                team.removeEntry(player.getName());
+                if (team.hasEntry(player.getName())) {
+                    team.removeEntry(player.getName());
+                }
             }
         }
     }

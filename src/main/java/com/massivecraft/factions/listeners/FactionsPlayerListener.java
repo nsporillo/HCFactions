@@ -24,6 +24,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.*;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -64,7 +65,9 @@ public class FactionsPlayerListener implements Listener {
                 FLocation.blockToChunk(player.getLocation().getBlockZ())
         );
 
-        fme.saveStats(); // set kills / deaths
+        fme.saveStats(player); // set kills / deaths
+
+        FScoreboard.init(fme);
 
         // Check for Faction announcements. Let's delay this so they actually see it.
         Bukkit.getScheduler().runTaskLaterAsynchronously(P.p, () -> {
@@ -72,8 +75,6 @@ public class FactionsPlayerListener implements Listener {
                 fme.getFaction().sendUnreadAnnouncements(fme);
             }
         }, 33L);
-
-        FScoreboard.init(fme);
 
         if (P.p.getConfig().getBoolean("scoreboard.default-enabled", false)) {
             int interval = P.p.getConfig().getInt("default-update-interval", 5);
@@ -83,15 +84,18 @@ public class FactionsPlayerListener implements Listener {
 
         FScoreboard.get(fme).setSidebarVisibility(P.p.cmdBase.cmdSB.showBoard(fme));
 
-        Faction myFaction = fme.getFaction();
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Faction myFaction = fme.getFaction();
 
-        final Set<FPlayer> onlineMembers = myFaction.getFPlayersWhereOnline(true);
+                final Set<FPlayer> onlineMembers = myFaction.getFPlayersWhereOnline(true);
 
-        Bukkit.getScheduler().runTaskAsynchronously(P.p, () -> {
-            if (!myFaction.isWilderness()) {
-                onlineMembers.stream().filter(other -> other != fme && other.isMonitoringJoins()).forEach(other -> other.msg(TL.FACTION_LOGIN, fme.getName()));
+                if (!myFaction.isWilderness()) {
+                    onlineMembers.stream().filter(other -> other != fme && other.isMonitoringJoins()).forEach(other -> other.msg(TL.FACTION_LOGIN, fme.getName()));
+                }
             }
-        });
+        }.runTaskAsynchronously(P.p);
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -101,7 +105,7 @@ public class FactionsPlayerListener implements Listener {
         // and update their last login time to point to when the logged off, for auto-remove routine
         me.setLastLoginTime(System.currentTimeMillis());
 
-        ((MemoryFPlayer) me).saveStats(); // cache kills / deaths
+        ((MemoryFPlayer) me).saveStats(event.getPlayer()); // cache kills / deaths
         ((MemoryFPlayer) me).setOnline(false);
 
         // if player is waiting for a fstuck request but leaves, cancel and alert when they come back

@@ -212,11 +212,11 @@ public abstract class MemoryFPlayer implements FPlayer {
         this.isAdminBypassing = other.isAdminBypassing;
     }
 
-    public void saveStats() {
-        Player player = this.getPlayer();
+    public void saveStats(Player player) {
         if (player == null) {
             return;
         }
+
         this.kills = player.getStatistic(Statistic.PLAYER_KILLS);
         this.deaths = player.getStatistic(Statistic.DEATHS);
     }

@@ -27,6 +27,21 @@ public class FTeamWrapper {
     private String teamName;
     private Faction faction;
 
+    public static void asyncPreloadTeamWrappers() {
+        if (P.p.getConfig().getBoolean("scoreboard.async-wrappers", false)) {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    for (Faction faction : Factions.getInstance().getAllFactions()) {
+                        wrappers.put(faction.getId(), new FTeamWrapper(faction));
+                    }
+
+                    P.p.debug("Preloaded FTeamWrappers for all factions. " + wrappers.size() + " in memory.");
+                }
+            }.runTaskAsynchronously(P.p);
+        }
+    }
+
     public static void applyUpdatesLater(final Faction faction) {
         if (!FScoreboard.isSupportedByServer() || !P.p.getConfig().getBoolean("scoreboard.default-prefixes", true)) {
             return;
@@ -79,8 +94,7 @@ public class FTeamWrapper {
         Set<FPlayer> factionMembers = faction.getFPlayers();
         boolean doWildernessUpdate = false;
 
-        if (wrapper != null && Factions.getInstance().getFactionById(faction.getId()) == null) {
-            wrappers.remove(faction.getId()); // gc disbanded faction
+        if (Factions.getInstance().getFactionById(faction.getId()) == null) {
             doWildernessUpdate = true; // update wilderness since it has a new player
         }
 

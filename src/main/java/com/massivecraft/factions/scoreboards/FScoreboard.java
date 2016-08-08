@@ -11,9 +11,10 @@ import org.bukkit.scoreboard.Scoreboard;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FScoreboard {
-    private static final Map<FPlayer, FScoreboard> fscoreboards = new HashMap<FPlayer, FScoreboard>();
+    private static final Map<FPlayer, FScoreboard> fscoreboards = new ConcurrentHashMap<>();
 
     private final Scoreboard scoreboard;
     private final FPlayer fplayer;

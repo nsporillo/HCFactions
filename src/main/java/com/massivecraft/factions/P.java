@@ -9,6 +9,7 @@ import com.massivecraft.factions.integration.Essentials;
 import com.massivecraft.factions.integration.Worldguard;
 import com.massivecraft.factions.integration.dynmap.EngineDynmap;
 import com.massivecraft.factions.listeners.*;
+import com.massivecraft.factions.scoreboards.FTeamWrapper;
 import com.massivecraft.factions.struct.ChatMode;
 import com.massivecraft.factions.util.*;
 import com.massivecraft.factions.zcore.MPlugin;
@@ -90,6 +91,8 @@ public class P extends MPlugin {
         this.cmdBase = new FCmdRoot();
         this.cmdAutoHelp = new CmdAutoHelp();
         this.getBaseCommands().add(cmdBase);
+
+        FTeamWrapper.asyncPreloadTeamWrappers();
 
         Econ.setup();
         setupPermissions();

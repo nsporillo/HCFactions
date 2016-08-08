@@ -201,7 +201,12 @@ public class FTeamWrapper {
 
     private void add(FScoreboard fboard) {
         Scoreboard board = fboard.getScoreboard();
-        Team team = board.registerNewTeam(teamName);
+        Team team = board.getTeam(teamName);
+
+        if (team == null) {
+            team = board.registerNewTeam(teamName);
+        }
+
         teams.put(fboard, team);
 
         for (OfflinePlayer player : members) {

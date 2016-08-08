@@ -294,6 +294,10 @@ public abstract class MemoryFPlayer implements FPlayer {
 
     /* Avoid new object allocation, reuse existing object and update all fields */
     public void setLastStoodAt(String world, int x, int z) {
+        if (this.lastStoodAt == null) {
+            this.lastStoodAt = new FLocation();
+        }
+
         this.lastStoodAt.setWorldName(world);
         this.lastStoodAt.setX(x);
         this.lastStoodAt.setZ(z);

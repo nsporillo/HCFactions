@@ -1,5 +1,7 @@
 HCFactions
 ====================
+[FAQ](https://github.com/nsporillo/HCFactions/wiki/FAQ)
+----------
 License
 ----------
 This project has a LGPL license just like the Bukkit project.<br>

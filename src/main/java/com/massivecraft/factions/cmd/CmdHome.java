@@ -79,8 +79,8 @@ public class CmdHome extends FCommand {
                     continue;
                 }
 
-                FPlayer fp = FPlayers.getInstance().getByPlayer(p);
-                if (fme.getRelationTo(fp) != Relation.ENEMY || fp.isVanished()) {
+                FPlayer target = FPlayers.getInstance().getByPlayer(p);
+                if (fme.getRelationTo(target) != Relation.ENEMY || target.isVanished(fme)) {
                     continue;
                 }
 

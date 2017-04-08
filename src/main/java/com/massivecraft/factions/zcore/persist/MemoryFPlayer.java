@@ -116,8 +116,9 @@ public abstract class MemoryFPlayer implements FPlayer {
         }
     }
 
-    public boolean isVanished() {
-        return Essentials.isVanished(getPlayer());
+    public boolean isVanished(FPlayer viewer) {
+        final Player me = getPlayer();
+        return Essentials.isVanished(me) || viewer.getPlayer().canSee(me);
     }
 
     @Override

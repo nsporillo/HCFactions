@@ -54,7 +54,7 @@ public interface FPlayer extends EconomyParticipator {
 
     boolean isAdminBypassing();
 
-    boolean isVanished();
+    boolean isVanished(FPlayer player);
 
     void setIsAdminBypassing(boolean val);
 

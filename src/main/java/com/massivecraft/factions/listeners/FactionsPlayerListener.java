@@ -58,6 +58,11 @@ public class FactionsPlayerListener implements Listener {
         // Update the lastLoginTime for this fplayer
         fme.setLastLoginTime(System.currentTimeMillis());
 
+        // prevent damage to other players directly after login
+        if (Conf.noPVPDamageToOthersForXSecondsAfterLogin > 0) {
+            fme.setLoginPvpDisabled(true);
+        }
+
         // Set players location and notify them where they are
         fme.setLastStoodAt(
                 player.getLocation().getWorld().getName(),

@@ -36,37 +36,35 @@ import java.util.*;
 
 public abstract class MemoryFPlayer implements FPlayer {
 
-    protected String factionId;
-    protected String title;
-    protected String id;
-    protected String name;
-    protected ChatMode chatMode;
-    protected Role role;
-    protected int kills, deaths;
-    protected boolean monitorJoins;
-    protected boolean spyingChat = false;
-    protected long lastLoginTime;
-    protected long lastCombatTime;
+    private String id;
+    private ChatMode chatMode;
+    private int kills, deaths;
 
+    @Getter private String factionId;
+    @Setter private String title;
+    @Setter private String name;
+    @Getter @Setter private Role role;
+    @Getter @Setter private boolean monitoringJoins;
+    @Getter @Setter private boolean spyingChat;
+    @Getter @Setter private long lastLoginTime;
+    @Getter @Setter private long lastCombatTime;
+
+    /* Transient fields not serialized to file */
     private transient UUID uuid;
-    protected transient FLocation lastStoodAt = new FLocation();
-    protected transient Faction autoClaimFor;
-    protected transient boolean mapAutoUpdating;
-    protected transient boolean autoSafeZoneEnabled;
-    protected transient boolean autoWarZoneEnabled;
-    protected transient boolean isAdminBypassing = false;
-    protected transient boolean loginPvpDisabled;
-    @Getter @Setter protected transient boolean online;
+    @Getter private transient Faction autoClaimFor;
+    @Getter private transient boolean autoSafeZoneEnabled;
+    @Getter private transient boolean autoWarZoneEnabled;
+    @Getter private transient boolean isAdminBypassing;
+    @Getter @Setter private transient boolean mapAutoUpdating;
+    @Getter @Setter private transient boolean loginPvpDisabled;
+    @Getter @Setter private transient boolean online;
+    @Getter @Setter private transient FLocation lastStoodAt = new FLocation();
 
     public Faction getFaction() {
         if (this.factionId == null) {
             this.factionId = "0";
         }
         return Factions.getInstance().getFactionById(this.factionId);
-    }
-
-    public String getFactionId() {
-        return this.factionId;
     }
 
     public boolean hasFaction() {
@@ -78,28 +76,9 @@ public abstract class MemoryFPlayer implements FPlayer {
         if (oldFaction != null) {
             oldFaction.removeFPlayer(this);
         }
+
         faction.addFPlayer(this);
         this.factionId = faction.getId();
-    }
-
-    public void setMonitorJoins(boolean monitor) {
-        this.monitorJoins = monitor;
-    }
-
-    public boolean isMonitoringJoins() {
-        return this.monitorJoins;
-    }
-
-    public Role getRole() {
-        return this.role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
-    }
-
-    public Faction getAutoClaimFor() {
-        return autoClaimFor;
     }
 
     public void setAutoClaimFor(Faction faction) {
@@ -111,8 +90,9 @@ public abstract class MemoryFPlayer implements FPlayer {
         }
     }
 
+    @Override
     public boolean isAutoSafeClaimEnabled() {
-        return autoSafeZoneEnabled;
+        return this.autoSafeZoneEnabled;
     }
 
     public void setIsAutoSafeClaimEnabled(boolean enabled) {
@@ -123,8 +103,9 @@ public abstract class MemoryFPlayer implements FPlayer {
         }
     }
 
+    @Override
     public boolean isAutoWarClaimEnabled() {
-        return autoWarZoneEnabled;
+        return this.autoWarZoneEnabled;
     }
 
     public void setIsAutoWarClaimEnabled(boolean enabled) {
@@ -135,18 +116,16 @@ public abstract class MemoryFPlayer implements FPlayer {
         }
     }
 
-    public boolean isAdminBypassing() {
-        return this.isAdminBypassing;
-    }
-
     public boolean isVanished() {
         return Essentials.isVanished(getPlayer());
     }
 
+    @Override
     public void setIsAdminBypassing(boolean val) {
         this.isAdminBypassing = val;
     }
 
+    @Override
     public void setChatMode(ChatMode chatMode) {
         this.chatMode = chatMode;
     }
@@ -158,20 +137,8 @@ public abstract class MemoryFPlayer implements FPlayer {
         return chatMode;
     }
 
-    public void setSpyingChat(boolean chatSpying) {
-        this.spyingChat = chatSpying;
-    }
-
-    public boolean isSpyingChat() {
-        return spyingChat;
-    }
-
-    // FIELD: account
     public String getAccountId() {
         return this.getId();
-    }
-
-    public MemoryFPlayer() {
     }
 
     public MemoryFPlayer(String id) {
@@ -184,7 +151,7 @@ public abstract class MemoryFPlayer implements FPlayer {
         this.deaths = 0;
         this.autoSafeZoneEnabled = false;
         this.autoWarZoneEnabled = false;
-        this.monitorJoins = true;
+        this.monitoringJoins = true;
         this.loginPvpDisabled = Conf.noPVPDamageToOthersForXSecondsAfterLogin > 0;
 
         if (!Conf.newPlayerStartingFactionID.equals("0") && Factions.getInstance().isValidFactionId(Conf.newPlayerStartingFactionID)) {
@@ -202,7 +169,7 @@ public abstract class MemoryFPlayer implements FPlayer {
         this.autoClaimFor = other.autoClaimFor;
         this.autoSafeZoneEnabled = other.autoSafeZoneEnabled;
         this.autoWarZoneEnabled = other.autoWarZoneEnabled;
-        this.monitorJoins = other.monitorJoins;
+        this.monitoringJoins = other.monitoringJoins;
         this.loginPvpDisabled = other.loginPvpDisabled;
         this.role = other.role;
         this.title = other.title;
@@ -245,34 +212,6 @@ public abstract class MemoryFPlayer implements FPlayer {
     // Getters And Setters
     // -------------------------------------------- //
 
-
-    public long getLastLoginTime() {
-        return lastLoginTime;
-    }
-
-    public void setLastLoginTime(long lastLoginTime) {
-        this.lastLoginTime = lastLoginTime;
-        if (Conf.noPVPDamageToOthersForXSecondsAfterLogin > 0) {
-            this.loginPvpDisabled = true;
-        }
-    }
-
-    public long getLastCombatTime() {
-        return this.lastCombatTime;
-    }
-
-    public void setLastCombatTime(long lastCombatTime) {
-        this.lastCombatTime = lastCombatTime;
-    }
-
-    public boolean isMapAutoUpdating() {
-        return mapAutoUpdating;
-    }
-
-    public void setMapAutoUpdating(boolean mapAutoUpdating) {
-        this.mapAutoUpdating = mapAutoUpdating;
-    }
-
     public boolean hasLoginPvpDisabled() {
         if (!loginPvpDisabled) {
             return false;
@@ -282,14 +221,6 @@ public abstract class MemoryFPlayer implements FPlayer {
             return false;
         }
         return true;
-    }
-
-    public FLocation getLastStoodAt() {
-        return this.lastStoodAt;
-    }
-
-    public void setLastStoodAt(FLocation flocation) {
-        this.lastStoodAt = flocation;
     }
 
     /* Avoid new object allocation, reuse existing object and update all fields */
@@ -313,10 +244,6 @@ public abstract class MemoryFPlayer implements FPlayer {
         return this.hasFaction() ? title : "";
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
     public String getName() {
         if (this.name == null) {
             // Older versions of FactionsUUID don't save the name,
@@ -326,10 +253,6 @@ public abstract class MemoryFPlayer implements FPlayer {
             this.name = offline.getName() != null ? offline.getName() : getId();
         }
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getTag() {
@@ -428,12 +351,12 @@ public abstract class MemoryFPlayer implements FPlayer {
     //----------------------------------------------//
     // Health
     //----------------------------------------------//
-    public void heal(int amnt) {
-        Player player = this.getPlayer();
-        if (player == null) {
+    public void heal(int amount) {
+        if (this.getPlayer() == null) {
             return;
         }
-        player.setHealth(player.getHealth() + amnt);
+
+        this.getPlayer().setHealth(this.getPlayer().getHealth() + amount);
     }
 
     public void onDeath(String world) {

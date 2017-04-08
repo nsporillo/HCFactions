@@ -32,7 +32,7 @@ public interface FPlayer extends EconomyParticipator {
 
     void setFaction(Faction faction);
 
-    void setMonitorJoins(boolean monitor);
+    void setMonitoringJoins(boolean monitor);
 
     boolean isMonitoringJoins();
 

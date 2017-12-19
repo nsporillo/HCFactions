@@ -88,7 +88,12 @@ public class TagUtil {
         for (TagReplacer tagReplacer : TagReplacer.getByType(TagType.FANCY)) {
             if (tagReplacer.contains(line)) {
                 String clean = line.replace(tagReplacer.getTag(), ""); // remove tag
-                return getFancy(faction, fme, tagReplacer, clean);
+
+                if (fme != null) {
+                    return getFancy(faction, fme, tagReplacer, clean);
+                } else {
+                    return getFancy(faction, tagReplacer, clean);
+                }
             }
         }
         return null;
@@ -107,6 +112,13 @@ public class TagUtil {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets fancy text as if the faction admin issued the command
+     */
+    protected static List<TextComponent> getFancy(Faction target, TagReplacer type, String prefix) {
+        return getFancy(target, target.getFPlayerAdmin(), type, prefix);
     }
 
     /**

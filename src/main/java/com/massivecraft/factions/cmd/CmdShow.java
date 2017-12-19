@@ -73,7 +73,11 @@ public class CmdShow extends FCommand {
 
                 if (components != null) {
                     for (TextComponent textComponent : components) {
-                        fme.getPlayer().spigot().sendMessage(textComponent);
+                        if (fme != null) {
+                            fme.getPlayer().spigot().sendMessage(textComponent);
+                        } else {
+                            sender.sendMessage(textComponent.toLegacyText());
+                        }
                     }
                 }
 
